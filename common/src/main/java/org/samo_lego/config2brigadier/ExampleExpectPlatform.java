@@ -1,4 +1,4 @@
-package net.examplemod;
+package org.samo_lego.config2brigadier;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.platform.Platform;

@@ -1,11 +1,11 @@
-package net.examplemod.fabric;
+package org.samo_lego.config2brigadier.fabric;
 
-import net.examplemod.ExampleMod;
+import org.samo_lego.config2brigadier.Config2Brigadier;
 import net.fabricmc.api.ModInitializer;
 
 public class ExampleModFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        ExampleMod.init();
+        Config2Brigadier.init();
     }
 }

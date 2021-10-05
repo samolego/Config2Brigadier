@@ -1,6 +1,6 @@
-package net.examplemod.fabric;
+package org.samo_lego.config2brigadier.fabric;
 
-import net.examplemod.ExampleExpectPlatform;
+import org.samo_lego.config2brigadier.ExampleExpectPlatform;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Path;

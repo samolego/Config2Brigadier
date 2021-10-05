@@ -3,8 +3,11 @@ plugins {
 }
 
 configurations {
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    shadowCommon
+    compileClasspath.extendsFrom shadowCommon
+    runtimeClasspath.extendsFrom shadowCommon
 }
+
 
 architectury {
     platformSetupLoomIde()
@@ -17,9 +20,6 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
-    implementation(project(path: ":common", configuration: "dev")) {
-        transitive = false
-    }
     developmentFabric(project(path: ":common", configuration: "dev")) {
         transitive = false
     }

@@ -1,6 +1,6 @@
-package net.examplemod.forge;
+package org.samo_lego.config2brigadier.forge;
 
-import net.examplemod.ExampleExpectPlatform;
+import org.samo_lego.config2brigadier.ExampleExpectPlatform;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Path;
