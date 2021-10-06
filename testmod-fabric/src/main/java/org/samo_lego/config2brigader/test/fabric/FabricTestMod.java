@@ -8,7 +8,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
-import org.samo_lego.config2brigadier.command.ConfigEditorBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +28,9 @@ public class FabricTestMod implements ModInitializer {
             e.printStackTrace();
         }
         String write = tomlWriter.write(config);
+        System.out.println("-------------TOML-------------------");
+        System.out.println(write);
+        System.out.println("------------------------------------");
         Toml read = new Toml().read(write);
         config = read.to(SimpleConfig.class);
     }
@@ -37,15 +39,13 @@ public class FabricTestMod implements ModInitializer {
         LiteralCommandNode<CommandSourceStack> root = dispatcher.register(literal(MOD_ID));
         LiteralCommandNode<CommandSourceStack> editConfig = literal("editConfig").build();
 
-        new ConfigEditorBuilder(editConfig, config, () -> {
-            // Use gson / toml to write config here ...
-            System.out.println(config);
-        }).build();
+        config.generateCommand(editConfig);
 
         root.addChild(editConfig);
 
         assert editConfig.getChild("activationRange") != null;
         System.out.println("AR: " + editConfig.getChild("activationRange"));
+        System.out.println("Random: " + editConfig.getChild("asldjads"));
         assert editConfig.getChild("message") != null;
         assert editConfig.getChild("show") != null;
         assert editConfig.getChild("nested").getChild("nestedMessage") != null;

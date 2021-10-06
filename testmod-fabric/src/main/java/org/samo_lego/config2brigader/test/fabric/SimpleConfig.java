@@ -2,13 +2,14 @@ package org.samo_lego.config2brigader.test.fabric;
 
 
 import com.google.gson.annotations.SerializedName;
+import org.samo_lego.config2brigadier.IConfig2B;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SimpleConfig {
+public class SimpleConfig implements IConfig2B {
 
     // Naming comments in style `_comment_` + `field name`
     @SerializedName("// When to activate feature xyz.")
@@ -29,7 +30,26 @@ public class SimpleConfig {
     @SerializedName("config_message")
     public String message = "This is a config guide.";
 
+    @SerializedName("// A secret toggle that is not included in edit command.")
+    public final String _comment_secretHiddenToggle = "(default: false)";
+    public boolean secretHiddenToggle = false;
+
     public NestedValues nested = new NestedValues();
+
+    @Override
+    public void save() {
+        System.out.println(this);
+    }
+
+    @Override
+    public boolean isDescription(Field field) {
+        return field.getName().startsWith("_comment_");
+    }
+
+    @Override
+    public boolean shouldExclude(Field field) {
+        return this.isDescription(field) || field.getName().equals("secretHiddenToggle");
+    }
 
     public static class NestedValues {
         public String messageNested = "This is a another message.";

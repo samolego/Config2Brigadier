@@ -1,6 +1,7 @@
 package org.samo_lego.config2brigadier.util;
 
 import org.jetbrains.annotations.Nullable;
+import org.samo_lego.config2brigadier.IConfig2B;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Creates an object containing lists with primitives, {@link String}s and nested {@link ConfigFieldList}s.
  */
-public record ConfigFieldList(Field parentField, Object parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> strings, List<ConfigFieldList> nestedFields) {
+public record ConfigFieldList(Field parentField, IConfig2B parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> strings, List<ConfigFieldList> nestedFields) {
 
     /**
      * Generates a {@link ConfigFieldList} for selected object with recursion.
@@ -21,7 +22,7 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
      *                    as the only config object that doesn't have a field is object itself, as it's a class.
      * @param parent - object to generate {@link ConfigFieldList} for
      */
-    public static ConfigFieldList populateFields(@Nullable Field parentField, Object parent, String commentPrefix, List<String> excludedFields) {
+    public static ConfigFieldList populateFields(@Nullable Field parentField, IConfig2B parent) {
         ArrayList<Field> bools = new ArrayList<>();
         ArrayList<Field> ints = new ArrayList<>();
         ArrayList<Field> floats = new ArrayList<>();
@@ -32,6 +33,9 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
         for(Field attribute : parent.getClass().getFields()) {
             Class<?> type = attribute.getType();
 
+            if(parent.shouldExclude(attribute))
+                continue;
+
             if(type.equals(boolean.class)) {
                 bools.add(attribute);
             } else if(type.equals(int.class)) {
@@ -41,15 +45,13 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
             } else if(type.equals(double.class)) {
                 doubles.add(attribute);
             } else if(type.equals(String.class)) {
-                String name = attribute.getName();
-                if((!name.startsWith(commentPrefix) || commentPrefix.isEmpty()) && !excludedFields.contains(name))
-                    strings.add(attribute);
+                strings.add(attribute);
             } else if(!type.equals(ArrayList.class)) {
                 // a subclass in our config
                 try {
                     attribute.setAccessible(true);
-                    Object childAttribute = attribute.get(parent);
-                    nested.add(populateFields(attribute, childAttribute, commentPrefix, excludedFields));
+                    IConfig2B childAttribute = (IConfig2B) attribute.get(parent);
+                    nested.add(populateFields(attribute, childAttribute));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }

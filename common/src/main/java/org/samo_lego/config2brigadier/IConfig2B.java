@@ -1,13 +1,13 @@
-package org.samo_lego.config2brigadier.command;
+package org.samo_lego.config2brigadier;
 
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
+import org.samo_lego.config2brigadier.command.CommandFeedback;
 import org.samo_lego.config2brigadier.util.ConfigFieldList;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.function.BiFunction;
 
 import static net.minecraft.commands.Commands.argument;
@@ -15,35 +15,53 @@ import static net.minecraft.commands.Commands.literal;
 import static org.samo_lego.config2brigadier.command.CommandFeedback.*;
 import static org.samo_lego.config2brigadier.util.ConfigFieldList.populateFields;
 
-public class CommandGenerator {
+/**
+ * An interface your config should implement.
+ */
+public interface IConfig2B {
 
     /**
-     * Generates /rootNode edit command
-     *
-     * @param config config object containing all toggles and options.
-     * @param root root command node, usually /modid
-     * @param saveConfigFile a runnable function that saves the config, e.g. config.save();
-     * @param commentPrefix prefix of fields that are comments (fields that start with this prefix will be excluded)
-     *                      * leave empty to include all fields
-     * @param excludedFields fields that will be excluded. Useful of you want to manually create nodes for editing those.
-     * @param commentText function that generates text for certain field. See also {@link CommandFeedback#defaultFieldDescription(Object, Field, String)}.
+     * Method called after a value is edited.
      */
-    static void generateEditCommand(Object config, LiteralCommandNode<CommandSourceStack> root, Runnable saveConfigFile, String commentPrefix, List<String> excludedFields, BiFunction<Object, Field, MutableComponent> commentText) {
-        ConfigFieldList configFields = populateFields(null, config, commentPrefix, excludedFields);
-        recursiveEditCommand(root, configFields, saveConfigFile, commentText);
+    void save();
+
+    /**
+     * Whether this field is a description field for other field (aka comment).
+     * @param field field to check.
+     * @return true if it is a description (comment) field, otherwise false.
+     */
+    boolean isDescription(Field field);
+
+    /**
+     * Indicates whether this field should be excluded from command.
+     * @param field field to check.
+     * @return true if it should not be included in command, otherwise false.
+     */
+    boolean shouldExclude(Field field);
+
+    /**
+     * Generates the command and attaches it to the provided node.
+     * @param editNode node to attach fields to.
+     */
+    default void generateCommand(LiteralCommandNode<CommandSourceStack> editNode) {
+        this.generateCommand(editNode, CommandFeedback::defaultFieldDescription);
     }
 
     /**
-     * Generates a command tree for selected {@link ConfigFieldList} and attaches it
-     * to {@link LiteralCommandNode<CommandSourceStack>}. As attributes have different
-     * types and therefore should accept different paramters as values, this goes
-     * through all needed primitives and then recursively repeats for nested {@link ConfigFieldList}s.
+     * Generates the command and attaches it to the provided node.
+     * @param editNode node to attach fields to.
+     * @param commentText text that will be sent to player, describing the field.
      */
-    private static void recursiveEditCommand(LiteralCommandNode<CommandSourceStack> root, ConfigFieldList configFields, Runnable saveConfigFile, BiFunction<Object, Field, MutableComponent> commentText) {
+    default void generateCommand(LiteralCommandNode<CommandSourceStack> editNode, BiFunction<IConfig2B, Field, MutableComponent> commentText) {
+        ConfigFieldList configFields = populateFields(null, this);
+        recursiveEditCommand(editNode, configFields, commentText);
+    }
+
+    static void recursiveEditCommand(LiteralCommandNode<CommandSourceStack> root, ConfigFieldList configFields, BiFunction<IConfig2B, Field, MutableComponent> commentText) {
         configFields.booleans().forEach(attribute -> {
             LiteralCommandNode<CommandSourceStack> node = literal(attribute.getName())
                     .then(argument("value", BoolArgumentType.bool())
-                            .executes(context -> CommandFeedback.editConfigBoolean(context, configFields.parent(), attribute, saveConfigFile))
+                            .executes(context -> CommandFeedback.editConfigBoolean(context, configFields.parent(), attribute))
                     )
                     .executes(context -> printFieldDescription(context, configFields.parent(), attribute, commentText))
                     .build();
@@ -53,7 +71,7 @@ public class CommandGenerator {
         configFields.integers().forEach(attribute -> {
             LiteralCommandNode<CommandSourceStack> node = literal(attribute.getName())
                     .then(argument("value", IntegerArgumentType.integer())
-                            .executes(context -> editConfigInt(context, configFields.parent(), attribute, saveConfigFile))
+                            .executes(context -> editConfigInt(context, configFields.parent(), attribute))
                     )
                     .executes(context -> printFieldDescription(context, configFields.parent(), attribute, commentText))
                     .build();
@@ -63,7 +81,7 @@ public class CommandGenerator {
         configFields.floats().forEach(attribute -> {
             LiteralCommandNode<CommandSourceStack> node = literal(attribute.getName())
                     .then(argument("value", FloatArgumentType.floatArg())
-                            .executes(context -> editConfigFloat(context, configFields.parent(), attribute, saveConfigFile))
+                            .executes(context -> editConfigFloat(context, configFields.parent(), attribute))
                     )
                     .executes(context -> printFieldDescription(context, configFields.parent(), attribute, commentText))
                     .build();
@@ -73,7 +91,7 @@ public class CommandGenerator {
         configFields.doubles().forEach(attribute -> {
             LiteralCommandNode<CommandSourceStack> node = literal(attribute.getName())
                     .then(argument("value", DoubleArgumentType.doubleArg())
-                            .executes(context -> editConfigDouble(context, configFields.parent(), attribute, saveConfigFile))
+                            .executes(context -> editConfigDouble(context, configFields.parent(), attribute))
                     )
                     .executes(context -> printFieldDescription(context, configFields.parent(), attribute, commentText))
                     .build();
@@ -83,7 +101,7 @@ public class CommandGenerator {
         configFields.strings().forEach(attribute -> {
             LiteralCommandNode<CommandSourceStack> node = literal(attribute.getName())
                     .then(argument("value", StringArgumentType.greedyString())
-                            .executes(context -> editConfigObject(context, configFields.parent(), attribute, saveConfigFile))
+                            .executes(context -> editConfigObject(context, configFields.parent(), attribute))
                     )
                     .executes(context -> printFieldDescription(context, configFields.parent(), attribute, commentText))
                     .build();
@@ -109,7 +127,7 @@ public class CommandGenerator {
                         return -1;
                     })
                     .build();
-            recursiveEditCommand(node, generator, saveConfigFile, commentText);
+            recursiveEditCommand(node, generator, commentText);
             root.addChild(node);
         });
     }

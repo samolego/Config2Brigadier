@@ -8,6 +8,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.samo_lego.config2brigadier.IConfig2B;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -20,7 +21,7 @@ import static org.samo_lego.config2brigadier.util.PlatformDependent.translatedCo
 
 public class CommandFeedback {
 
-    public static int editConfigAttribute(CommandContext<CommandSourceStack> context, Object parent, Field attribute, Object value, Predicate<Field> fieldConsumer, Runnable saveConfigFunction) {
+    public static int editConfigAttribute(CommandContext<CommandSourceStack> context, IConfig2B parent, Field attribute, Object value, Predicate<Field> fieldConsumer) {
         attribute.setAccessible(true);
         boolean result = fieldConsumer.test(attribute);
 
@@ -32,7 +33,7 @@ public class CommandFeedback {
         option += attribute.getName();
 
         if(result) {
-            saveConfigFunction.run();
+            parent.save();
 
             context.getSource().sendSuccess(translatedComponent("config2brigadier.command.config.edit.success", option, value.toString()).withStyle(ChatFormatting.GREEN), false);
         } else {
@@ -42,7 +43,7 @@ public class CommandFeedback {
         return result ? 1 : 0;
     }
 
-    public static int editConfigBoolean(CommandContext<CommandSourceStack> context, Object parent, Field attribute, Runnable saveConfigFunction) {
+    public static int editConfigBoolean(CommandContext<CommandSourceStack> context, IConfig2B parent, Field attribute) {
         boolean value = BoolArgumentType.getBool(context, "value");
 
         return editConfigAttribute(context, parent, attribute, value, field -> {
@@ -53,10 +54,10 @@ public class CommandFeedback {
                 e.printStackTrace();
             }
             return false;
-        }, saveConfigFunction);
+        });
     }
 
-    public static int editConfigInt(CommandContext<CommandSourceStack> context, Object parent, Field attribute, Runnable saveConfigFunction) {
+    public static int editConfigInt(CommandContext<CommandSourceStack> context, IConfig2B parent, Field attribute) {
         int value = IntegerArgumentType.getInteger(context, "value");
 
         return editConfigAttribute(context, parent, attribute, value, field -> {
@@ -67,10 +68,10 @@ public class CommandFeedback {
                 e.printStackTrace();
             }
             return false;
-        }, saveConfigFunction);
+        });
     }
 
-    public static int editConfigFloat(CommandContext<CommandSourceStack> context, Object parent, Field attribute, Runnable saveConfigFunction) {
+    public static int editConfigFloat(CommandContext<CommandSourceStack> context, IConfig2B parent, Field attribute) {
         float value = FloatArgumentType.getFloat(context, "value");
 
         return editConfigAttribute(context, parent, attribute, value, field -> {
@@ -81,10 +82,10 @@ public class CommandFeedback {
                 e.printStackTrace();
             }
             return false;
-        }, saveConfigFunction);
+        });
     }
 
-    public static int editConfigDouble(CommandContext<CommandSourceStack> context, Object parent, Field attribute, Runnable saveConfigFunction) {
+    public static int editConfigDouble(CommandContext<CommandSourceStack> context, IConfig2B parent, Field attribute) {
         double value = DoubleArgumentType.getDouble(context, "value");
 
         return editConfigAttribute(context, parent, attribute, value, field -> {
@@ -95,10 +96,10 @@ public class CommandFeedback {
                 e.printStackTrace();
             }
             return false;
-        }, saveConfigFunction);
+        });
     }
 
-    public static int editConfigObject(CommandContext<CommandSourceStack> context, Object parent, Field attribute, Runnable saveConfigFunction) {
+    public static int editConfigObject(CommandContext<CommandSourceStack> context, IConfig2B parent, Field attribute) {
         String value = StringArgumentType.getString(context, "value");
 
         return editConfigAttribute(context, parent, attribute, value, field -> {
@@ -109,7 +110,7 @@ public class CommandFeedback {
                 e.printStackTrace();
             }
             return false;
-        }, saveConfigFunction);
+        });
     }
 
     /**
@@ -121,10 +122,9 @@ public class CommandFeedback {
      *
      * @param parent parent config object.
      * @param attribute field to generate description for.
-     * @param commentPrefix comment prefix of description fields.
      * @return text description of field.
      */
-    public static TextComponent defaultFieldDescription(Object parent, Field attribute, String commentPrefix) {
+    public static TextComponent defaultFieldDescription(IConfig2B parent, Field attribute) {
         TextComponent fieldDesc = new TextComponent("");
         String attributeName = attribute.getName();
 
@@ -132,7 +132,7 @@ public class CommandFeedback {
         Field[] fields = parent.getClass().getFields();
         List<Field> descriptions = Arrays.stream(fields).filter(field -> {
             String name = field.getName();
-            return name.startsWith(commentPrefix) && name.contains(attributeName) && field.isAnnotationPresent(SerializedName.class);
+            return parent.isDescription(field) && name.contains(attributeName) && field.isAnnotationPresent(SerializedName.class);
         }).collect(Collectors.toList());
 
         int size = descriptions.size();
@@ -162,7 +162,7 @@ public class CommandFeedback {
         return fieldDesc;
     }
 
-    public static int printFieldDescription(CommandContext<CommandSourceStack> context, Object parent, Field attribute, BiFunction<Object, Field, MutableComponent> commentText) {
+    public static int printFieldDescription(CommandContext<CommandSourceStack> context, IConfig2B parent, Field attribute, BiFunction<IConfig2B, Field, MutableComponent> commentText) {
         MutableComponent fieldDesc = commentText.apply(parent, attribute);
 
         try {
@@ -170,7 +170,8 @@ public class CommandFeedback {
 
             String val = value.toString();
             // fixme Ugly check if it's not an object
-            if(!val.contains("@")) {
+            // Does this work todo
+            if(!(value instanceof IConfig2B)) {
                 MutableComponent valueComponent = new TextComponent(val + "\n").withStyle(ChatFormatting.AQUA);
                 fieldDesc.append(translatedComponent("config2brigadier.misc.current_value", valueComponent).withStyle(ChatFormatting.GRAY));
             }

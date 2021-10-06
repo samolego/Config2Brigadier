@@ -9,6 +9,9 @@ configurations {
     //runtimeClasspath.extendsFrom shadowCommon
 }
 
+artifacts {
+    dev(jar)
+}
 
 architectury {
     platformSetupLoomIde()
