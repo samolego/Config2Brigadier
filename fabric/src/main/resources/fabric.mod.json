@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "org.samo_lego.config2brigadier.Config2Brigadier::init"
+      "org.samo_lego.config2brigadier.fabric.C2BFabric"
     ]
   },
   "depends": {

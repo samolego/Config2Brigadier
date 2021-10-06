@@ -44,8 +44,6 @@ public class FabricTestMod implements ModInitializer {
         root.addChild(editConfig);
 
         assert editConfig.getChild("activationRange") != null;
-        System.out.println("AR: " + editConfig.getChild("activationRange"));
-        System.out.println("Random: " + editConfig.getChild("asldjads"));
         assert editConfig.getChild("message") != null;
         assert editConfig.getChild("show") != null;
         assert editConfig.getChild("nested").getChild("nestedMessage") != null;

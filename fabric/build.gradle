@@ -20,6 +20,7 @@ architectury {
 
 repositories {
     maven { url = "https://maven.nucleoid.xyz/" }
+    maven { url = "https://jitpack.io" }
 }
 
 dependencies {
@@ -27,8 +28,7 @@ dependencies {
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     // Serverside translations
-    include("fr.catcore:server-translations-api:${project.server_translations_api}")
-    modRuntimeOnly("fr.catcore:server-translations-api:${project.server_translations_api}")
+    modImplementation include("fr.catcore:server-translations-api:${project.server_translations_api}")
 
     implementation(project(path: ":common", configuration: "dev")) {
         transitive = false

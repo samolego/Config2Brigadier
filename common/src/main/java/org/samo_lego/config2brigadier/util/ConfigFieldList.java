@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Creates an object containing lists with primitives, {@link String}s and nested {@link ConfigFieldList}s.
  */
-public record ConfigFieldList(Field parentField, IConfig2B parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> strings, List<ConfigFieldList> nestedFields) {
+public record ConfigFieldList(Field parentField, Object parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> strings, List<ConfigFieldList> nestedFields) {
 
     /**
      * Generates a {@link ConfigFieldList} for selected object with recursion.
@@ -22,7 +22,7 @@ public record ConfigFieldList(Field parentField, IConfig2B parent, List<Field> b
      *                    as the only config object that doesn't have a field is object itself, as it's a class.
      * @param parent - object to generate {@link ConfigFieldList} for
      */
-    public static ConfigFieldList populateFields(@Nullable Field parentField, IConfig2B parent) {
+    public static ConfigFieldList populateFields(@Nullable Field parentField, Object parent, IConfig2B config) {
         ArrayList<Field> bools = new ArrayList<>();
         ArrayList<Field> ints = new ArrayList<>();
         ArrayList<Field> floats = new ArrayList<>();
@@ -33,7 +33,9 @@ public record ConfigFieldList(Field parentField, IConfig2B parent, List<Field> b
         for(Field attribute : parent.getClass().getFields()) {
             Class<?> type = attribute.getType();
 
-            if(parent.shouldExclude(attribute))
+
+
+            if(config.shouldExclude(attribute))
                 continue;
 
             if(type.equals(boolean.class)) {
@@ -50,8 +52,8 @@ public record ConfigFieldList(Field parentField, IConfig2B parent, List<Field> b
                 // a subclass in our config
                 try {
                     attribute.setAccessible(true);
-                    IConfig2B childAttribute = (IConfig2B) attribute.get(parent);
-                    nested.add(populateFields(attribute, childAttribute));
+                    Object childAttribute = attribute.get(parent);
+                    nested.add(populateFields(attribute, childAttribute, config));
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
