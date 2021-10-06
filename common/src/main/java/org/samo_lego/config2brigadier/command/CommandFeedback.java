@@ -7,7 +7,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.lang.reflect.Field;
@@ -16,6 +15,8 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.samo_lego.config2brigadier.util.PlatformDependent.translatedComponent;
 
 public class CommandFeedback {
 
@@ -33,9 +34,9 @@ public class CommandFeedback {
         if(result) {
             saveConfigFunction.run();
 
-            context.getSource().sendSuccess(new TranslatableComponent("taterzens.command.config.edit.success", option, value.toString()).withStyle(ChatFormatting.GREEN), false);
+            context.getSource().sendSuccess(translatedComponent("config2brigadier.command.config.edit.success", option, value.toString()).withStyle(ChatFormatting.GREEN), false);
         } else {
-            context.getSource().sendFailure(new TranslatableComponent("taterzens.command.config.edit.failure", option).withStyle(ChatFormatting.RED));
+            context.getSource().sendFailure(translatedComponent("config2brigadier.command.config.edit.failure", option).withStyle(ChatFormatting.RED));
         }
 
         return result ? 1 : 0;
@@ -152,7 +153,7 @@ public class CommandFeedback {
             }
         } else {
             // This field has no comments describing it
-            MutableComponent feedback = new TranslatableComponent("taterzens.command.config.edit.no_description_found", attributeName)
+            MutableComponent feedback = translatedComponent("config2brigadier.command.config.edit.no_description_found", attributeName)
                     .withStyle(ChatFormatting.RED)
                     .append("\n");
             fieldDesc.append(feedback);
@@ -171,14 +172,14 @@ public class CommandFeedback {
             // fixme Ugly check if it's not an object
             if(!val.contains("@")) {
                 MutableComponent valueComponent = new TextComponent(val + "\n").withStyle(ChatFormatting.AQUA);
-                fieldDesc.append(new TranslatableComponent("taterzens.misc.current_value", valueComponent).withStyle(ChatFormatting.GRAY));
+                fieldDesc.append(translatedComponent("config2brigadier.misc.current_value", valueComponent).withStyle(ChatFormatting.GRAY));
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
 
         MutableComponent type = new TextComponent(attribute.getType().getSimpleName()).withStyle(ChatFormatting.AQUA);
-        fieldDesc.append(new TranslatableComponent("taterzens.misc.type", type).withStyle(ChatFormatting.GRAY));
+        fieldDesc.append(translatedComponent("config2brigadier.misc.type", type).withStyle(ChatFormatting.GRAY));
 
         context.getSource().sendSuccess(fieldDesc.withStyle(ChatFormatting.GOLD), false);
 

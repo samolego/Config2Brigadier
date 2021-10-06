@@ -42,7 +42,7 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
                 doubles.add(attribute);
             } else if(type.equals(String.class)) {
                 String name = attribute.getName();
-                if((!name.startsWith(commentPrefix) || commentPrefix.isEmpty()) && excludedFields.contains(name))
+                if((!name.startsWith(commentPrefix) || commentPrefix.isEmpty()) && !excludedFields.contains(name))
                     strings.add(attribute);
             } else if(!type.equals(ArrayList.class)) {
                 // a subclass in our config

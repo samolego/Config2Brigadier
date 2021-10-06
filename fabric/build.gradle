@@ -4,8 +4,9 @@ plugins {
 
 configurations {
     shadowCommon
-    compileClasspath.extendsFrom shadowCommon
-    runtimeClasspath.extendsFrom shadowCommon
+    dev
+    //compileClasspath.extendsFrom shadowCommon
+    //runtimeClasspath.extendsFrom shadowCommon
 }
 
 
@@ -14,12 +15,21 @@ architectury {
     fabric()
 }
 
+repositories {
+    maven { url = "https://maven.nucleoid.xyz/" }
+}
+
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
-    // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
+    // Serverside translations
+    include("fr.catcore:server-translations-api:${project.server_translations_api}")
+    modRuntimeOnly("fr.catcore:server-translations-api:${project.server_translations_api}")
+
+    implementation(project(path: ":common", configuration: "dev")) {
+        transitive = false
+    }
     developmentFabric(project(path: ":common", configuration: "dev")) {
         transitive = false
     }
@@ -38,14 +48,15 @@ processResources {
 
 shadowJar {
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    classifier "shadow"
 }
 
 remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    classifier "fabric"
+    dependsOn(shadowJar)
+    input.set(shadowJar.archiveFile)
+    archiveClassifier = "fabric"
 }
+
 
 jar {
     classifier "dev"
