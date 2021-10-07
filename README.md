@@ -48,6 +48,19 @@ public class MyModConfig implements IBrigadierConfigurator {
     public boolean show = true;
 
     public String message = "This is a config guide.";
+
+    public NestedValues nested = new NestedValues();
+
+    public static class NestedValues {
+        public String message = "This is a another message.";
+    }
+
+    public List<String> randomQuestions = new ArrayList<>(Arrays.asList(
+            "Why no forge port?",
+            "When quilt?",
+            "Tiny potato or tiny pumpkin?",
+            "What is minecraft?" // How dare you
+    ));
     
     // Methods that need to be overriden
     /**
