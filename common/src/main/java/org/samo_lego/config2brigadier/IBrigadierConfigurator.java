@@ -106,7 +106,7 @@ public interface IBrigadierConfigurator {
      *         is static
      *     </li>
      *     <li>
-     *         contains "_comment_" in its name
+     *         starts with "_comment_"
      *     </li>
      *     <li>
      *         has {@link BrigadierExcluded} annotation
