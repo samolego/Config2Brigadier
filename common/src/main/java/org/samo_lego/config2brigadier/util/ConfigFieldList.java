@@ -1,7 +1,7 @@
 package org.samo_lego.config2brigadier.util;
 
 import org.jetbrains.annotations.Nullable;
-import org.samo_lego.config2brigadier.IConfig2B;
+import org.samo_lego.config2brigadier.IBrigadierConfigurator;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
      *                    as the only config object that doesn't have a field is object itself, as it's a class.
      * @param parent - object to generate {@link ConfigFieldList} for
      */
-    public static ConfigFieldList populateFields(@Nullable Field parentField, Object parent, IConfig2B config) {
+    public static ConfigFieldList populateFields(@Nullable Field parentField, Object parent, IBrigadierConfigurator config) {
         ArrayList<Field> bools = new ArrayList<>();
         ArrayList<Field> ints = new ArrayList<>();
         ArrayList<Field> floats = new ArrayList<>();
@@ -32,8 +32,6 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
 
         for(Field attribute : parent.getClass().getFields()) {
             Class<?> type = attribute.getType();
-
-
 
             if(config.shouldExclude(attribute))
                 continue;

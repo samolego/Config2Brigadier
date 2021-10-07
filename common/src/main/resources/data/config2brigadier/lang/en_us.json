@@ -1,5 +1,8 @@
 {
-  "config2brigadier.command.config.edit.success": "Config option %s was successfully set to %s.",
-  "config2brigadier.command.config.edit.failure": "Couldn't change config option %s. This is probably a bug.",
-  "config2brigadier.command.config.edit.no_description_found": "No description was found for option %s."
+  "config2brigadier.command.edit.success": "Config option %s was successfully set to %s.",
+  "config2brigadier.command.edit.failure": "Couldn't change config option %s. This is probably a bug.",
+  "config2brigadier.command.edit.no_description_found": "No description was found for option %s.",
+  "config2brigadier.command.misc.current_value": "Current value: %s",
+  "config2brigadier.command.misc.default_value": "Default value: %s",
+  "config2brigadier.command.misc.type": "Type: %s"
 }

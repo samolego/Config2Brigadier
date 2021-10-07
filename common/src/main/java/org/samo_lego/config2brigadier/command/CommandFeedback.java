@@ -4,38 +4,68 @@ import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import org.samo_lego.config2brigadier.IConfig2B;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import org.apache.commons.lang3.StringUtils;
+import org.samo_lego.config2brigadier.IBrigadierConfigurator;
 import org.samo_lego.config2brigadier.util.TranslatedText;
 
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
-
+/**
+ * Takes care of field editing and feedbacks for executed commands.
+ */
 public class CommandFeedback {
 
-    public static int editConfigAttribute(CommandContext<CommandSourceStack> context, Object parent, IConfig2B config, Field attribute, Object value, Predicate<Field> fieldConsumer) {
+    /**
+     * Edits the config field.
+     * @param context command executor to send feedback to.
+     * @param parent parent object that contains field that will be changed.
+     * @param config the config object which fields are getting modified.
+     * @param attribute field to edit.
+     * @param value new value for the field.
+     * @param fieldConsumer lambda that modifies the field (needs to be different for each primitive).
+     *                      Should return true for success, false on error.
+     * @return 1 for success, 0 for error.
+     */
+    public static int editConfigAttribute(CommandContext<CommandSourceStack> context, Object parent, IBrigadierConfigurator config, Field attribute, Object value, Predicate<Field> fieldConsumer) {
         attribute.setAccessible(true);
         boolean result = fieldConsumer.test(attribute);
 
-        String option = parent.getClass().getSimpleName();
+        String option = StringUtils.difference(config.getClass().getName(), parent.getClass().getName());
 
         if(!option.isEmpty()) {
+            System.out.println(option);
             option = option.replaceAll("\\$", ".") + ".";
+
+            if(option.startsWith("."))
+                option = option.substring(1);
         }
         option += attribute.getName();
+        MutableComponent optionText = new TextComponent(option);
 
         if(result) {
             config.save();
+            MutableComponent newValue = new TextComponent(value.toString()).withStyle(ChatFormatting.YELLOW);
 
-            context.getSource().sendSuccess(new TranslatedText("config2brigadier.command.config.edit.success", option, value.toString()).withStyle(ChatFormatting.GREEN), false);
+            context.getSource().sendSuccess(new TranslatedText("config2brigadier.command.edit.success", optionText.withStyle(ChatFormatting.YELLOW), newValue).withStyle(ChatFormatting.GREEN), false);
         } else {
-            context.getSource().sendFailure(new TranslatedText("config2brigadier.command.config.edit.failure", option).withStyle(ChatFormatting.RED));
+            context.getSource().sendFailure(new TranslatedText("config2brigadier.command.edit.failure", optionText.withStyle(ChatFormatting.LIGHT_PURPLE)).withStyle(ChatFormatting.RED));
         }
 
         return result ? 1 : 0;
     }
 
-    public static int editConfigBoolean(CommandContext<CommandSourceStack> context, Object parent, IConfig2B config, Field attribute) {
+    /**
+     * Edits the config boolean field.
+     * @param context command executor to send feedback to.
+     * @param parent parent object that contains field that will be changed.
+     * @param config the config object which fields are getting modified.
+     * @param attribute field to edit.
+     * @return 1 for success, 0 for error.
+     */
+    public static int editConfigBoolean(CommandContext<CommandSourceStack> context, Object parent, IBrigadierConfigurator config, Field attribute) {
         boolean value = BoolArgumentType.getBool(context, "value");
 
         return editConfigAttribute(context, parent, config, attribute, value, field -> {
@@ -49,7 +79,15 @@ public class CommandFeedback {
         });
     }
 
-    public static int editConfigInt(CommandContext<CommandSourceStack> context, Object parent, IConfig2B config, Field attribute) {
+    /**
+     * Edits the config integer field.
+     * @param context command executor to send feedback to.
+     * @param parent parent object that contains field that will be changed.
+     * @param config the config object which fields are getting modified.
+     * @param attribute field to edit.
+     * @return 1 for success, 0 for error.
+     */
+    public static int editConfigInt(CommandContext<CommandSourceStack> context, Object parent, IBrigadierConfigurator config, Field attribute) {
         int value = IntegerArgumentType.getInteger(context, "value");
 
         return editConfigAttribute(context, parent, config, attribute, value, field -> {
@@ -63,7 +101,15 @@ public class CommandFeedback {
         });
     }
 
-    public static int editConfigFloat(CommandContext<CommandSourceStack> context, Object parent, IConfig2B config, Field attribute) {
+    /**
+     * Edits the config float field.
+     * @param context command executor to send feedback to.
+     * @param parent parent object that contains field that will be changed.
+     * @param config the config object which fields are getting modified.
+     * @param attribute field to edit.
+     * @return 1 for success, 0 for error.
+     */
+    public static int editConfigFloat(CommandContext<CommandSourceStack> context, Object parent, IBrigadierConfigurator config, Field attribute) {
         float value = FloatArgumentType.getFloat(context, "value");
 
         return editConfigAttribute(context, parent, config, attribute, value, field -> {
@@ -77,7 +123,15 @@ public class CommandFeedback {
         });
     }
 
-    public static int editConfigDouble(CommandContext<CommandSourceStack> context, Object parent, IConfig2B config, Field attribute) {
+    /**
+     * Edits the config double field.
+     * @param context command executor to send feedback to.
+     * @param parent parent object that contains field that will be changed.
+     * @param config the config object which fields are getting modified.
+     * @param attribute field to edit.
+     * @return 1 for success, 0 for error.
+     */
+    public static int editConfigDouble(CommandContext<CommandSourceStack> context, Object parent, IBrigadierConfigurator config, Field attribute) {
         double value = DoubleArgumentType.getDouble(context, "value");
 
         return editConfigAttribute(context, parent, config, attribute, value, field -> {
@@ -91,7 +145,15 @@ public class CommandFeedback {
         });
     }
 
-    public static int editConfigObject(CommandContext<CommandSourceStack> context, Object parent, IConfig2B config, Field attribute) {
+    /**
+     * Edits the config object field.
+     * @param context command executor to send feedback to.
+     * @param parent parent object that contains field that will be changed.
+     * @param config the config object which fields are getting modified.
+     * @param attribute field to edit.
+     * @return 1 for success, 0 for error.
+     */
+    public static int editConfigObject(CommandContext<CommandSourceStack> context, Object parent, IBrigadierConfigurator config, Field attribute) {
         String value = StringArgumentType.getString(context, "value");
 
         return editConfigAttribute(context, parent, config, attribute, value, field -> {
