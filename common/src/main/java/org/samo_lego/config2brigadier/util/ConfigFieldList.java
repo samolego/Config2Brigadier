@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Creates an object containing lists with primitives, {@link String}s and nested {@link ConfigFieldList}s.
  */
-public record ConfigFieldList(Field parentField, Object parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> strings, List<Field> lists, List<ConfigFieldList> nestedFields) {
+public record ConfigFieldList(Field parentField, Object parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> objects, List<ConfigFieldList> nestedFields) {
 
     /**
      * Generates a {@link ConfigFieldList} for selected object with recursion.
@@ -23,12 +23,11 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
      * @param parent - object to generate {@link ConfigFieldList} for
      */
     public static ConfigFieldList populateFields(@Nullable Field parentField, Object parent, IBrigadierConfigurator config) {
-        ArrayList<Field> bools = new ArrayList<>();
-        ArrayList<Field> ints = new ArrayList<>();
-        ArrayList<Field> floats = new ArrayList<>();
-        ArrayList<Field> doubles = new ArrayList<>();
-        ArrayList<Field> strings = new ArrayList<>();
-        ArrayList<Field> lists = new ArrayList<>();
+        List<Field> bools = new ArrayList<>();
+        List<Field> ints = new ArrayList<>();
+        List<Field> floats = new ArrayList<>();
+        List<Field> doubles = new ArrayList<>();
+        List<Field> objects = new ArrayList<>();
         List<ConfigFieldList> nested = new ArrayList<>();
 
         for(Field attribute : parent.getClass().getFields()) {
@@ -45,10 +44,6 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
                 floats.add(attribute);
             } else if(type.equals(double.class)) {
                 doubles.add(attribute);
-            } else if(type.equals(String.class)) {
-                strings.add(attribute);
-            } else if(type.equals(List.class)) {
-                lists.add(attribute);
             } else if(type.isMemberClass()) {
                 // a subclass in our config
                 try {
@@ -58,6 +53,8 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
+            } else if(type.equals(List.class)) {
+                objects.add(attribute);
             }
         }
 
@@ -68,8 +65,7 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
             Collections.unmodifiableList(ints),
             Collections.unmodifiableList(floats),
             Collections.unmodifiableList(doubles),
-            Collections.unmodifiableList(strings),
-            Collections.unmodifiableList(lists),
+            Collections.unmodifiableList(objects),
             Collections.unmodifiableList(nested)
         );
     }

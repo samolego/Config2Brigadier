@@ -177,17 +177,9 @@ public interface IBrigadierConfigurator {
             root.addChild(node);
         });
 
-        configFields.strings().forEach(attribute -> {
-            LiteralCommandNode<CommandSourceStack> node = literal(attribute.getName())
-                    .then(argument("value", StringArgumentType.greedyString())
-                            .executes(context -> editConfigObject(context, configFields.parent(), this, attribute))
-                    )
-                    .executes(context -> generateFieldInfo(context, configFields.parent(), attribute))
-                    .build();
-            root.addChild(node);
-        });
 
-        configFields.lists().forEach(attribute -> {
+        // Takes care of strings, lists and other json-serializable objects.
+        configFields.objects().forEach(attribute -> {
             LiteralCommandNode<CommandSourceStack> node = literal(attribute.getName())
                     .then(argument("value", StringArgumentType.greedyString())
                             .executes(context -> editConfigObject(context, configFields.parent(), this, attribute))
