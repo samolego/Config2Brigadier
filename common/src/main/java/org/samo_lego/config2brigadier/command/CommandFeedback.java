@@ -13,6 +13,8 @@ import org.samo_lego.config2brigadier.util.TranslatedText;
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
+import static org.samo_lego.config2brigadier.Config2Brigadier.GSON;
+
 /**
  * Takes care of field editing and feedbacks for executed commands.
  */
@@ -154,7 +156,8 @@ public class CommandFeedback {
      * @return 1 for success, 0 for error.
      */
     public static int editConfigObject(CommandContext<CommandSourceStack> context, Object parent, IBrigadierConfigurator config, Field attribute) {
-        String value = StringArgumentType.getString(context, "value");
+        String arg = StringArgumentType.getString(context, "value");
+        Object value = GSON.fromJson(arg, attribute.getType());
 
         return editConfigAttribute(context, parent, config, attribute, value, field -> {
             try {

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Creates an object containing lists with primitives, {@link String}s and nested {@link ConfigFieldList}s.
  */
-public record ConfigFieldList(Field parentField, Object parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> strings, List<ConfigFieldList> nestedFields) {
+public record ConfigFieldList(Field parentField, Object parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> strings, List<Field> lists, List<ConfigFieldList> nestedFields) {
 
     /**
      * Generates a {@link ConfigFieldList} for selected object with recursion.
@@ -28,6 +28,7 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
         ArrayList<Field> floats = new ArrayList<>();
         ArrayList<Field> doubles = new ArrayList<>();
         ArrayList<Field> strings = new ArrayList<>();
+        ArrayList<Field> lists = new ArrayList<>();
         List<ConfigFieldList> nested = new ArrayList<>();
 
         for(Field attribute : parent.getClass().getFields()) {
@@ -46,7 +47,9 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
                 doubles.add(attribute);
             } else if(type.equals(String.class)) {
                 strings.add(attribute);
-            } else if(!type.equals(ArrayList.class)) {
+            } else if(type.equals(List.class)) {
+                lists.add(attribute);
+            } else if(type.isMemberClass()) {
                 // a subclass in our config
                 try {
                     attribute.setAccessible(true);
@@ -66,6 +69,7 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
             Collections.unmodifiableList(floats),
             Collections.unmodifiableList(doubles),
             Collections.unmodifiableList(strings),
+            Collections.unmodifiableList(lists),
             Collections.unmodifiableList(nested)
         );
     }

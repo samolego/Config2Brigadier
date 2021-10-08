@@ -1,7 +1,5 @@
 package org.samo_lego.config2brigadier.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.samo_lego.config2brigadier.Config2Brigadier;
@@ -13,10 +11,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.samo_lego.config2brigadier.Config2Brigadier.GSON;
 
 public class TranslatedText extends TranslatableComponent {
 
-    private static final Gson gson = new GsonBuilder().create();
     private static JsonObject LANG = new JsonObject();
     public static boolean SERVER_TRANSLATIONS_LOADED;
 
@@ -44,7 +42,7 @@ public class TranslatedText extends TranslatableComponent {
             }
             assert stream != null;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
-                LANG = gson.fromJson(reader, JsonObject.class);
+                LANG = GSON.fromJson(reader, JsonObject.class);
             }
         } catch (IOException | AssertionError e) {
             getLogger("Config2Brigadier").error("[Config2Brigadier] Problem occurred when trying to load language: ", e);
