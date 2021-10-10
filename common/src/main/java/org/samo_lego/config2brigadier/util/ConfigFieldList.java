@@ -10,7 +10,7 @@ import java.util.List;
 
 
 /**
- * Creates an object containing lists with primitives, {@link String}s and nested {@link ConfigFieldList}s.
+ * Creates an object containing lists with primitives, {@link Object}s and nested {@link ConfigFieldList}s.
  */
 public record ConfigFieldList(Field parentField, Object parent, List<Field> booleans, List<Field> integers, List<Field> floats, List<Field> doubles, List<Field> objects, List<ConfigFieldList> nestedFields) {
 
@@ -53,7 +53,7 @@ public record ConfigFieldList(Field parentField, Object parent, List<Field> bool
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
-            } else if(type.equals(List.class)) {
+            } else {
                 objects.add(attribute);
             }
         }

@@ -3,6 +3,7 @@ A small, JIJ-able library to automagically generate in-game command for config e
 Useful for serverside mods.
 
 https://user-images.githubusercontent.com/34912839/136461980-de7735d0-93c1-4fee-a805-eb8256dc476e.mp4
+
 (generated from [below example](#usage))
 
 ## Warning

@@ -238,54 +238,58 @@ public interface IBrigadierConfigurator {
      * @return text description of field.
      */
     default MutableComponent generateFieldDescription(Object parent, Field attribute) {
-        MutableComponent fieldDesc = new TextComponent("");
+        MutableComponent textFeedback = new TextComponent("");
         String attributeName = attribute.getName();
 
         // Comment from @BrigadierDescription annotation
         String fieldDescription = this.getDescription(attribute);
-        if(!fieldDescription.isEmpty()) {
+        boolean emptyBrigadierDesc = fieldDescription.isEmpty();
+        if(!emptyBrigadierDesc) {
             // Our annotation
-            fieldDesc.append(new TextComponent(fieldDescription + "\n"));
+            textFeedback.append(new TextComponent(fieldDescription));
         }
 
 
         // Comments from @Serialized name annotations.
         // Filters out relevant fields (ones that contain same name as field)
         Field[] fields = parent.getClass().getFields();
-        List<Field> descriptions = Arrays.stream(fields).filter(field -> {
+        List<Field> descriptionList = Arrays.stream(fields).filter(field -> {
             String name = field.getName();
             return name.contains(attributeName);
         }).collect(Collectors.toList());
 
         // -1 as we don't want to include the option field itself, but just its comments.
-        int size = descriptions.size() - 1;
+        int size = descriptionList.size() - 1;
         if (size > 0) {
-            String[] descs = new String[size];
+            String[] sortedDescriptions = new String[size];
 
-            descriptions.forEach(field -> {
+            descriptionList.forEach(field -> {
                 int index = NumberUtils.toInt(field.getName().replaceAll("\\D+", ""), 0);
                 String description = this.getDescription(field);
                 if(!description.isEmpty()) {
-                    descs[index] = description;
+                    sortedDescriptions[index] = description;
                 }
             });
 
-            for (String desc : descs) {
+            for (int i = 0; i < sortedDescriptions.length; ++i) {
                 // Adding descriptions
-                fieldDesc.append(new TextComponent(desc + "\n"));
+                String desc = sortedDescriptions[i];
+                if(i == 0 && emptyBrigadierDesc)
+                    textFeedback.append(new TextComponent(desc));
+                else
+                    textFeedback.append(new TextComponent("\n").append(desc));
             }
         }
 
-        if(fieldDesc.getSiblings().isEmpty()) {
+        if(textFeedback.getSiblings().isEmpty()) {
             // This field has no comments describing it
             MutableComponent feedback = new TranslatedText("config2brigadier.command.edit.no_description_found", attributeName)
-                    .withStyle(ChatFormatting.RED)
-                    .append("\n");
-            fieldDesc.append(feedback);
+                    .withStyle(ChatFormatting.RED);
+            textFeedback.append(feedback);
         }
 
 
-        return fieldDesc;
+        return textFeedback;
     }
 
     /**
@@ -302,18 +306,16 @@ public interface IBrigadierConfigurator {
         fieldDesc.withStyle(ChatFormatting.RESET);
         
         try {
-            Object value = attribute.get(parent);
-
-            String val = value.toString();
-            // fixme Ugly check if it's not an object
-            if (!val.contains("@")) {
-                MutableComponent valueComponent = new TextComponent(val + "\n").withStyle(ChatFormatting.GREEN)
+            Object val = attribute.get(parent);
+            String value = val.toString();
+            if (!attribute.getType().isMemberClass()) {
+                MutableComponent valueComponent = new TextComponent(value).withStyle(ChatFormatting.GREEN)
                         .withStyle(ChatFormatting.BOLD)
                         .withStyle(style -> style
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(val)))
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, val))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(value)))
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, value))
                         );
-                fieldDesc.append(new TranslatedText("config2brigadier.command.misc.current_value", valueComponent).withStyle(ChatFormatting.GRAY));
+                fieldDesc.append("\n").append(new TranslatedText("config2brigadier.command.misc.current_value", valueComponent).withStyle(ChatFormatting.GRAY));
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -322,16 +324,21 @@ public interface IBrigadierConfigurator {
         // Default value
         if (attribute.isAnnotationPresent(BrigadierDescription.class)) {
             String defaultOption = attribute.getAnnotation(BrigadierDescription.class).defaultOption();
-            MutableComponent defaultValueComponent = new TextComponent(defaultOption + "\n").withStyle(ChatFormatting.DARK_GREEN)
-                .withStyle(style -> style
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(defaultOption)))
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, defaultOption))
-                );
-            fieldDesc.append(new TranslatedText("config2brigadier.command.misc.default_value", defaultValueComponent).withStyle(ChatFormatting.GRAY));
+            if (!defaultOption.isEmpty()) {
+                MutableComponent defaultValueComponent = new TextComponent(defaultOption).withStyle(ChatFormatting.DARK_GREEN)
+                        .withStyle(style -> style
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(defaultOption)))
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, defaultOption))
+                        );
+                fieldDesc.append("\n").append(new TranslatedText("config2brigadier.command.misc.default_value", defaultValueComponent).withStyle(ChatFormatting.GRAY));
+            }
         }
 
-        MutableComponent type = new TextComponent(attribute.getType().getSimpleName()).withStyle(ChatFormatting.AQUA);
-        fieldDesc.append(new TranslatedText("config2brigadier.command.misc.type", type).withStyle(ChatFormatting.GRAY));
+        // Field type
+        if (!attribute.getType().isMemberClass()) {
+            MutableComponent type = new TextComponent(attribute.getType().getSimpleName()).withStyle(ChatFormatting.AQUA);
+            fieldDesc.append("\n").append(new TranslatedText("config2brigadier.command.misc.type", type).withStyle(ChatFormatting.GRAY));
+        }
 
         context.getSource().sendSuccess(fieldDesc.withStyle(ChatFormatting.GOLD), false);
 

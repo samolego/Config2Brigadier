@@ -157,6 +157,10 @@ public class CommandFeedback {
      */
     public static int editConfigObject(CommandContext<CommandSourceStack> context, Object parent, IBrigadierConfigurator config, Field attribute) {
         String arg = StringArgumentType.getString(context, "value");
+
+        // Fix for strings
+        if (attribute.getType().equals(String.class))
+            arg = "\"" + arg + "\"";
         Object value = GSON.fromJson(arg, attribute.getType());
 
         return editConfigAttribute(context, parent, config, attribute, value, field -> {
