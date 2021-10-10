@@ -42,8 +42,19 @@ public interface IBrigadierConfigurator {
      */
     void save();
 
+
     /**
      * Loads changes from given config object into this object.
+     * Useful as if we overwrite the config, we'd have to re-register command.
+     *
+     * @param newConfig new config object which field values will be copied over to default one.
+     */
+    default void reload(Object newConfig) {
+        this.recursiveReload(this, newConfig);
+    }
+
+    /**
+     * Loads changes from given config object into this object recursively.
      * Useful as if we overwrite the config, we'd have to re-register command.
      * Usage:
      *     config.reloadValues(config, newConfig);
@@ -51,7 +62,8 @@ public interface IBrigadierConfigurator {
      * @param config config object that will have its values changed.
      * @param newConfig new config object which field values will be copied over to default one.
      */
-    default void reloadValues(Object config, Object newConfig) {
+    @ApiStatus.Internal
+    default void recursiveReload(Object config, Object newConfig) {
         try {
             for(Field field : config.getClass().getFields()) {
                 Class<?> type = field.getType();
@@ -66,7 +78,7 @@ public interface IBrigadierConfigurator {
                     field.set(config, value);
                 } else {
                     // Recursion
-                    this.reloadValues(field.get(config), value);
+                    this.recursiveReload(field.get(config), value);
                 }
             }
         } catch (IllegalAccessException e) {

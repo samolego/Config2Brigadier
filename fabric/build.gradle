@@ -4,11 +4,9 @@ plugins {
 
 configurations {
     shadowCommon
-    dev
-}
+    compileClasspath.extendsFrom shadowCommon
+    runtimeClasspath.extendsFrom shadowCommon
 
-artifacts {
-    dev(jar)
 }
 
 architectury {
@@ -26,9 +24,6 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-    implementation(project(path: ":common", configuration: "dev")) {
-        transitive = false
-    }
     developmentFabric(project(path: ":common", configuration: "dev")) {
         transitive = false
     }

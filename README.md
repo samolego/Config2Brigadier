@@ -3,6 +3,7 @@ A small, JIJ-able library to automagically generate in-game command for config e
 Useful for serverside mods.
 
 https://user-images.githubusercontent.com/34912839/136461980-de7735d0-93c1-4fee-a805-eb8256dc476e.mp4
+(generated from [below example](#usage))
 
 ## Warning
 
@@ -40,7 +41,7 @@ dependencies {
 You need a special class that wil hold your config data. Make it implement the [`IBrigadierConfigurator`](https://github.com/samolego/Config2Brigadier/blob/master/common/src/main/java/org/samo_lego/config2brigadier/IBrigadierConfigurator.java)
 interface.
 
-Config class
+Sample config class
 ```java
 public class MyModConfig implements IBrigadierConfigurator {
     public float activationRange = 8.0F;
@@ -71,8 +72,6 @@ public class MyModConfig implements IBrigadierConfigurator {
     public void save() {
         // Save it however you want
     }
-
-
 }
 ```
 
@@ -92,10 +91,10 @@ public static class MyMod {
         final MyModConfig config = new MyModConfig();
         config.generateCommand(editConfig);
 
-        // A built-in reload(config, newConfig) method is available to be called
+        // A built-in `reload(newConfig)` method is available to be called
         // if you need to load the config values from `newConfig`.
         MyModConfig newConfig = new MyModConfig(); // or load config from disk
-        config.reload(config, newConfig);
+        config.reload(newConfig);
         // config now has newConfig values
 
         // Finally, add edit config node to `/mymod` command
