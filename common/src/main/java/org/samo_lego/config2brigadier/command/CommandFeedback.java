@@ -38,7 +38,6 @@ public class CommandFeedback {
         String option = StringUtils.difference(config.getClass().getName(), parent.getClass().getName());
 
         if(!option.isEmpty()) {
-            System.out.println(option);
             option = option.replaceAll("\\$", ".") + ".";
 
             if(option.startsWith("."))
