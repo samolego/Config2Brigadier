@@ -6,10 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.samo_lego.config2brigadier.annotation.BrigadierDescription;
@@ -34,6 +31,9 @@ import static org.samo_lego.config2brigadier.util.ConfigFieldList.populateFields
  */
 public interface IBrigadierConfigurator {
 
+    /**
+     * Default comment field prefix.
+     */
     String COMMENT_PREFIX = "_comment_";
 
     /**
@@ -90,24 +90,36 @@ public interface IBrigadierConfigurator {
      * Gets description for the field.
      *
      * @param field field to check.
-     * @return true if it is a description (comment) field, otherwise false.
+     * @return description string of the field.
      */
     default String getDescription(Field field) {
         String description = "";
 
         if(field.isAnnotationPresent(BrigadierDescription.class)) {
             description = field.getAnnotation(BrigadierDescription.class).value();
-        } else {
+        } else if (this.enableSerializedNameComments()) {
             String name = field.getName();
 
             // Comments in style https://quiltservertools.github.io/ServerSideDevDocs/config/gson_config/#poor-mans-comments
-            if(name.startsWith(COMMENT_PREFIX) && field.isAnnotationPresent(SerializedName.class)) {
+            if(name.startsWith(this.getCommentPrefix()) && field.isAnnotationPresent(SerializedName.class)) {
                 SerializedName serializedName = field.getAnnotation(SerializedName.class);
                 description += serializedName.value().substring("// ".length());
             }
         }
 
         return description;
+    }
+
+    /**
+     * Whether to try getting comments from fields
+     * that are prefixed with {@link IBrigadierConfigurator#getCommentPrefix()} and
+     * have custom {@link SerializedName} values.
+     *
+     * @see <a href="https://quiltservertools.github.io/ServerSideDevDocs/config/gson_config/#poor-mans-comments">Server Dev Docs</a>.
+     * @return true by default.
+     */
+    default boolean enableSerializedNameComments() {
+        return true;
     }
 
     /**
@@ -129,7 +141,15 @@ public interface IBrigadierConfigurator {
      * @return true if it should not be included in command, otherwise false.
      */
     default boolean shouldExclude(Field field) {
-        return field.getName().startsWith(COMMENT_PREFIX) || field.isAnnotationPresent(BrigadierExcluded.class) || Modifier.isStatic(field.getModifiers());
+        return field.getName().startsWith(this.getCommentPrefix()) || field.isAnnotationPresent(BrigadierExcluded.class) || Modifier.isStatic(field.getModifiers());
+    }
+
+    /**
+     * Gets comment prefix of fields.
+     * @return field prefix that is used by comment fields.
+     */
+    default String getCommentPrefix() {
+        return this.COMMENT_PREFIX;
     }
 
     /**
@@ -246,7 +266,7 @@ public interface IBrigadierConfigurator {
         boolean emptyBrigadierDesc = fieldDescription.isEmpty();
         if(!emptyBrigadierDesc) {
             // Our annotation
-            textFeedback.append(new TextComponent(fieldDescription));
+            textFeedback.append(new TranslatableComponent(fieldDescription));
         }
 
 
@@ -284,7 +304,7 @@ public interface IBrigadierConfigurator {
         if(textFeedback.getSiblings().isEmpty()) {
             // This field has no comments describing it
             MutableComponent feedback = new TranslatedText("config2brigadier.command.edit.no_description_found", attributeName)
-                    .withStyle(ChatFormatting.RED);
+                    .withStyle(ChatFormatting.LIGHT_PURPLE);
             textFeedback.append(feedback);
         }
 
@@ -304,7 +324,23 @@ public interface IBrigadierConfigurator {
     default int generateFieldInfo(CommandContext<CommandSourceStack> context, Object parent, Field attribute) {
         MutableComponent fieldDesc = new TextComponent("").append(this.generateFieldDescription(parent, attribute).withStyle(ChatFormatting.ITALIC));
         fieldDesc.withStyle(ChatFormatting.RESET);
-        
+
+        // Default value
+        String defaultOption = "";
+        if (attribute.isAnnotationPresent(BrigadierDescription.class)) {
+            defaultOption = attribute.getAnnotation(BrigadierDescription.class).defaultOption();
+
+            if (!defaultOption.isEmpty()) {
+                final String finalDefaultOption = defaultOption;
+                MutableComponent defaultValueComponent = new TextComponent(defaultOption).withStyle(ChatFormatting.DARK_GREEN)
+                        .withStyle(style -> style
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(finalDefaultOption)))
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, finalDefaultOption))
+                        );
+                fieldDesc.append("\n").append(new TranslatedText("editGamerule.default", defaultValueComponent).withStyle(ChatFormatting.GRAY));
+            }
+        }
+
         try {
             Object val = attribute.get(parent);
             String value = val.toString();
@@ -315,29 +351,27 @@ public interface IBrigadierConfigurator {
                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(value)))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, value))
                         );
-                fieldDesc.append("\n").append(new TranslatedText("config2brigadier.command.misc.current_value", valueComponent).withStyle(ChatFormatting.GRAY));
+
+                if (!defaultOption.isEmpty() && !defaultOption.equals(value)) {
+                    // This value is modified
+                    valueComponent.append(new TextComponent(" (*)").withStyle(ChatFormatting.YELLOW));
+                }
+
+                fieldDesc.append("\n").append(new TranslatableComponent("options.fullscreen.current")
+                        .append(": ")
+                        .append(valueComponent)
+                        .withStyle(ChatFormatting.GRAY)
+                );
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
 
-        // Default value
-        if (attribute.isAnnotationPresent(BrigadierDescription.class)) {
-            String defaultOption = attribute.getAnnotation(BrigadierDescription.class).defaultOption();
-            if (!defaultOption.isEmpty()) {
-                MutableComponent defaultValueComponent = new TextComponent(defaultOption).withStyle(ChatFormatting.DARK_GREEN)
-                        .withStyle(style -> style
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(defaultOption)))
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, defaultOption))
-                        );
-                fieldDesc.append("\n").append(new TranslatedText("config2brigadier.command.misc.default_value", defaultValueComponent).withStyle(ChatFormatting.GRAY));
-            }
-        }
 
         // Field type
         if (!attribute.getType().isMemberClass()) {
             MutableComponent type = new TextComponent(attribute.getType().getSimpleName()).withStyle(ChatFormatting.AQUA);
-            fieldDesc.append("\n").append(new TranslatedText("config2brigadier.command.misc.type", type).withStyle(ChatFormatting.GRAY));
+            fieldDesc.append("\n").append(new TranslatedText("gui.entity_tooltip.type", type).withStyle(ChatFormatting.GRAY));
         }
 
         context.getSource().sendSuccess(fieldDesc.withStyle(ChatFormatting.GOLD), false);
