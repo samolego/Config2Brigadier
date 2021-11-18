@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.samo_lego.config2brigadier"},{"l":"org.samo_lego.config2brigadier.annotation"},{"l":"org.samo_lego.config2brigadier.command"},{"l":"org.samo_lego.config2brigadier.util"}];updateSearchResults();
