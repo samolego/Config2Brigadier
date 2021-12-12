@@ -19,7 +19,7 @@ repositories {
 
 minecraft {
     version(project.minecraft_version)
-    platform(MinecraftPlatform.JOINED)
+    platform(MinecraftPlatform.SERVER)
 
     runs {
         server()
