@@ -1,4 +1,0 @@
-{
-  "config2brigadier.command.edit.success": "Nastavitev %s je bila uspešno nastavljena na %s.",
-  "config2brigadier.command.edit.no_description_found": "Za nastavitev %s ni bilo mogoče najti nobenega opisa."
-}

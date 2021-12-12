@@ -1,4 +1,0 @@
-{
-  "config2brigadier.command.edit.success": "Config option %s was successfully set to %s.",
-  "config2brigadier.command.edit.no_description_found": "No description was found for option %s."
-}
