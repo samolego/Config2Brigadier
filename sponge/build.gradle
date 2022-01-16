@@ -1,0 +1,66 @@
+import org.spongepowered.gradle.plugin.config.PluginLoaders
+import org.spongepowered.gradle.vanilla.repository.MinecraftPlatform
+import org.spongepowered.plugin.metadata.model.PluginDependency
+
+dependencies {
+    compileOnly("org.spongepowered:mixin:0.8.3-SNAPSHOT")
+    compileOnly("org.spongepowered:spongeapi:9.0.0-SNAPSHOT")
+
+    // It doesn't want to compile without this
+    testCompileOnly("org.spongepowered:mixin:0.8.3-SNAPSHOT")
+
+    compileOnly project(":common")
+}
+
+minecraft {
+    version(rootProject.minecraft_version)
+    platform(MinecraftPlatform.JOINED)
+
+    /*runs {
+        server()
+        client()
+    }*/
+}
+
+tasks.withType(JavaCompile) {
+    source(project(":common").sourceSets.main.allSource)
+}
+
+processResources {
+    from project(":common").sourceSets.main.resources
+}
+
+sponge {
+    apiVersion("9.0.0-SNAPSHOT")
+    license("LGPL-3.0")
+    loader {
+        name(PluginLoaders.JAVA_PLAIN)
+        version("1.0")
+    }
+    plugin("config2brigadier") {
+        displayName("Config2Brigadier")
+        entrypoint("org.samo_lego.config2brigadier.sponge.C2BSponge")
+        description("A library to automagically generate in-game command for config editing.")
+        contributor("samo_lego") {
+            description("Lead Developer")
+        }
+        dependency("spongeapi") {
+            loadOrder(PluginDependency.LoadOrder.AFTER)
+            optional(false)
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : "Taterzens",
+                "Specification-Vendor"    : "",
+                "Specification-Version"   : rootProject.mod_version,
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}

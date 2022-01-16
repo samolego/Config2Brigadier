@@ -21,15 +21,11 @@ repositories {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_version}"
 
-    developmentFabric(project(path: ":common", configuration: "dev")) {
-        transitive = false
-    }
-    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) {
-        transitive = false
-    }
+    developmentFabric(project(path: ":common", configuration: "dev")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 }
 
 processResources {
