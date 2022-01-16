@@ -39,7 +39,7 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier "forge"
+    classifier null
 }
 
 jar {
