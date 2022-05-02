@@ -54,7 +54,7 @@ sponge {
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "Taterzens",
+                "Specification-Title"     : "Config2Brigadier",
                 "Specification-Vendor"    : "",
                 "Specification-Version"   : rootProject.mod_version,
                 "Implementation-Title"    : project.name,
