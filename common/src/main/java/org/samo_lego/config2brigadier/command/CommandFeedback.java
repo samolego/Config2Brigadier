@@ -1,12 +1,15 @@
 package org.samo_lego.config2brigadier.command;
 
-import com.mojang.brigadier.arguments.*;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.samo_lego.config2brigadier.IBrigadierConfigurator;
 import org.samo_lego.config2brigadier.util.TranslatedText;
@@ -45,15 +48,19 @@ public class CommandFeedback {
                 option = option.substring(1);
         }
         option += attribute.getName();
-        MutableComponent optionText = new TextComponent(option);
+        MutableComponent optionText = Component.literal(option);
 
         if(result) {
             config.save();
-            MutableComponent newValue = new TextComponent(value.toString()).withStyle(ChatFormatting.YELLOW);
+            MutableComponent newValue = Component.literal(value.toString()).withStyle(ChatFormatting.YELLOW);
 
-            context.getSource().sendSuccess(new TranslatedText("config2brigadier.command.edit.success", optionText.withStyle(ChatFormatting.YELLOW), newValue).withStyle(ChatFormatting.GREEN), false);
+            context.getSource().sendSuccess(
+                    MutableComponent.create(
+                            new TranslatedText("config2brigadier.command.edit.success",
+                                    optionText.withStyle(ChatFormatting.YELLOW),
+                                    newValue)).withStyle(ChatFormatting.GREEN), false);
         } else {
-            context.getSource().sendFailure(new TranslatableComponent("command.failed").withStyle(ChatFormatting.RED));
+            context.getSource().sendFailure(Component.translatable("command.failed").withStyle(ChatFormatting.RED));
         }
 
         return result ? 1 : 0;

@@ -11,8 +11,8 @@ pluginManagement {
 
 include("common")
 include("fabric")
-include("forge")
-include("sponge")
+//include("forge")
+//include("sponge")
 
 // test
 include("testmod-common")

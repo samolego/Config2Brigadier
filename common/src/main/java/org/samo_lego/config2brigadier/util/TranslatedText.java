@@ -1,7 +1,7 @@
 package org.samo_lego.config2brigadier.util;
 
 import com.google.gson.JsonObject;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.samo_lego.config2brigadier.Config2Brigadier;
 
 import java.io.BufferedReader;
@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import static org.apache.logging.log4j.LogManager.getLogger;
 import static org.samo_lego.config2brigadier.Config2Brigadier.GSON;
 
-public class TranslatedText extends TranslatableComponent {
+public class TranslatedText extends TranslatableContents {
 
     private static JsonObject LANG = new JsonObject();
     public static boolean SERVER_TRANSLATIONS_LOADED;

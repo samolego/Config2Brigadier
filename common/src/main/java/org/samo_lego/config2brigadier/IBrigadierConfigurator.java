@@ -1,12 +1,19 @@
 package org.samo_lego.config2brigadier;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.brigadier.arguments.*;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.samo_lego.config2brigadier.annotation.BrigadierDescription;
@@ -23,7 +30,10 @@ import java.util.stream.Collectors;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static org.samo_lego.config2brigadier.command.CommandFeedback.*;
+import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigDouble;
+import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigFloat;
+import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigInt;
+import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigObject;
 import static org.samo_lego.config2brigadier.util.ConfigFieldList.populateFields;
 
 /**
@@ -258,7 +268,7 @@ public interface IBrigadierConfigurator {
      * @return text description of field.
      */
     default MutableComponent generateFieldDescription(Object parent, Field attribute) {
-        MutableComponent textFeedback = new TextComponent("");
+        MutableComponent textFeedback = Component.literal("");
         String attributeName = attribute.getName();
 
         // Comment from @BrigadierDescription annotation
@@ -266,7 +276,7 @@ public interface IBrigadierConfigurator {
         boolean emptyBrigadierDesc = fieldDescription.isEmpty();
         if(!emptyBrigadierDesc) {
             // Our annotation
-            textFeedback.append(new TranslatableComponent(fieldDescription));
+            textFeedback.append(Component.translatable(fieldDescription));
         }
 
 
@@ -295,15 +305,15 @@ public interface IBrigadierConfigurator {
                 // Adding descriptions
                 String desc = sortedDescriptions[i];
                 if(i == 0 && emptyBrigadierDesc)
-                    textFeedback.append(new TextComponent(desc));
+                    textFeedback.append(Component.literal(desc));
                 else
-                    textFeedback.append(new TextComponent("\n").append(desc));
+                    textFeedback.append(Component.literal("\n").append(desc));
             }
         }
 
         if(textFeedback.getSiblings().isEmpty()) {
             // This field has no comments describing it
-            MutableComponent feedback = new TranslatedText("config2brigadier.command.edit.no_description_found", attributeName)
+            MutableComponent feedback = MutableComponent.create(new TranslatedText("config2brigadier.command.edit.no_description_found", attributeName))
                     .withStyle(ChatFormatting.LIGHT_PURPLE);
             textFeedback.append(feedback);
         }
@@ -322,7 +332,7 @@ public interface IBrigadierConfigurator {
      */
     @ApiStatus.Internal
     default int generateFieldInfo(CommandContext<CommandSourceStack> context, Object parent, Field attribute) {
-        MutableComponent fieldDesc = new TextComponent("").append(this.generateFieldDescription(parent, attribute).withStyle(ChatFormatting.ITALIC));
+        MutableComponent fieldDesc = Component.literal("").append(this.generateFieldDescription(parent, attribute).withStyle(ChatFormatting.ITALIC));
         fieldDesc.withStyle(ChatFormatting.RESET);
 
         // Default value
@@ -332,12 +342,12 @@ public interface IBrigadierConfigurator {
 
             if (!defaultOption.isEmpty()) {
                 final String finalDefaultOption = defaultOption;
-                MutableComponent defaultValueComponent = new TextComponent(defaultOption).withStyle(ChatFormatting.DARK_GREEN)
+                MutableComponent defaultValueComponent = Component.literal(defaultOption).withStyle(ChatFormatting.DARK_GREEN)
                         .withStyle(style -> style
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(finalDefaultOption)))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(finalDefaultOption)))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, finalDefaultOption))
                         );
-                fieldDesc.append("\n").append(new TranslatedText("editGamerule.default", defaultValueComponent).withStyle(ChatFormatting.GRAY));
+                fieldDesc.append("\n").append(MutableComponent.create(new TranslatedText("editGamerule.default", defaultValueComponent)).withStyle(ChatFormatting.GRAY));
             }
         }
 
@@ -345,19 +355,19 @@ public interface IBrigadierConfigurator {
             Object val = attribute.get(parent);
             String value = val.toString();
             if (!attribute.getType().isMemberClass()) {
-                MutableComponent valueComponent = new TextComponent(value).withStyle(ChatFormatting.GREEN)
+                MutableComponent valueComponent = Component.literal(value).withStyle(ChatFormatting.GREEN)
                         .withStyle(ChatFormatting.BOLD)
                         .withStyle(style -> style
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(value)))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(value)))
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, value))
                         );
 
                 if (!defaultOption.isEmpty() && !defaultOption.equals(value)) {
                     // This value is modified
-                    valueComponent.append(new TextComponent(" (*)").withStyle(ChatFormatting.YELLOW));
+                    valueComponent.append(Component.literal(" (*)").withStyle(ChatFormatting.YELLOW));
                 }
 
-                fieldDesc.append("\n").append(new TranslatableComponent("options.fullscreen.current")
+                fieldDesc.append("\n").append(Component.translatable("options.fullscreen.current")
                         .append(": ")
                         .append(valueComponent)
                         .withStyle(ChatFormatting.GRAY)
@@ -370,8 +380,9 @@ public interface IBrigadierConfigurator {
 
         // Field type
         if (!attribute.getType().isMemberClass()) {
-            MutableComponent type = new TextComponent(attribute.getType().getSimpleName()).withStyle(ChatFormatting.AQUA);
-            fieldDesc.append("\n").append(new TranslatedText("gui.entity_tooltip.type", type).withStyle(ChatFormatting.GRAY));
+            MutableComponent type = Component.literal(attribute.getType().getSimpleName()).withStyle(ChatFormatting.AQUA);
+            fieldDesc.append("\n").append(
+                    MutableComponent.create(new TranslatedText("gui.entity_tooltip.type", type)).withStyle(ChatFormatting.GRAY));
         }
 
         context.getSource().sendSuccess(fieldDesc.withStyle(ChatFormatting.GOLD), false);

@@ -57,16 +57,9 @@ publishing {
     publications {
         mavenFabric(MavenPublication) {
             artifactId = rootProject.archivesBaseName + "-fabric"
-            artifact(remapJar) { classifier null }
-            afterEvaluate {
-                artifact(remapSourcesJar.output) {
-                    builtBy remapSourcesJar
-                    classifier "sources"
-                }
-            }
+            from components.java
         }
     }
-
 
     // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
