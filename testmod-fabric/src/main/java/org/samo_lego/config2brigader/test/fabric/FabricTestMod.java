@@ -6,8 +6,10 @@ import com.moandjiezana.toml.TomlWriter;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +37,9 @@ public class FabricTestMod implements ModInitializer {
         config = read.to(SimpleConfig.class);
     }
 
-    private static void registerSimpleCommand(CommandDispatcher<CommandSourceStack> dispatcher, boolean dedicated) {
+
+
+    private static void registerSimpleCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection selection) {
         LiteralCommandNode<CommandSourceStack> root = dispatcher.register(literal(MOD_ID));
         LiteralCommandNode<CommandSourceStack> editConfig = literal("editConfig").build();
 

@@ -56,7 +56,7 @@ sourcesJar {
 publishing {
     publications {
         mavenFabric(MavenPublication) {
-            artifactId = rootProject.archivesBaseName + "-fabric"
+            artifactId = archivesBaseName
             from components.java
         }
     }
