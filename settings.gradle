@@ -11,9 +11,9 @@ pluginManagement {
 
 include("common")
 include("fabric")
-//include("forge")
-//include("sponge")
-
+if (forge_enabled.toBoolean()) {
+    include("forge")
+}
 // test
 include("testmod-common")
 include("testmod-fabric")
