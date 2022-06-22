@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.apache.logging.log4j.LogManager.getLogger;
 import static org.samo_lego.config2brigadier.Config2Brigadier.GSON;
+import static org.samo_lego.config2brigadier.Config2Brigadier.MOD_ID;
 
 public class TranslatedText extends TranslatableContents {
 
@@ -37,7 +38,7 @@ public class TranslatedText extends TranslatableContents {
 
         try {
             if(stream == null) {
-                getLogger("Config2Brigadier").warn("[Config2Brigadier] Language " + lang + " not available. Switching to en_us.");
+                getLogger(MOD_ID).warn("[Config2Brigadier] Language " + lang + " not available. Switching to en_us.");
                 stream = Config2Brigadier.class.getResourceAsStream("/data/config2brigadier/lang/en_us.json");
             }
             assert stream != null;

@@ -22,14 +22,23 @@ import org.samo_lego.config2brigadier.command.CommandFeedback;
 import org.samo_lego.config2brigadier.util.ConfigFieldList;
 import org.samo_lego.config2brigadier.util.TranslatedText;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
+import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.samo_lego.config2brigadier.Config2Brigadier.GSON;
+import static org.samo_lego.config2brigadier.Config2Brigadier.MOD_ID;
 import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigDouble;
 import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigFloat;
 import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigInt;
@@ -49,6 +58,8 @@ public interface IBrigadierConfigurator {
     /**
      * Method called after a value is edited. The config should be saved to prevent
      * in-memory-only changes.
+     *
+     * You can call {@link #writeToFile(File)} to save the config to a file.
      */
     void save();
 
@@ -320,6 +331,22 @@ public interface IBrigadierConfigurator {
 
 
         return textFeedback;
+    }
+
+
+
+
+    /**
+     * Saves the config to the given file.
+     *
+     * @param file file to save config to
+     */
+    default void writeToFile(File file) {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+            GSON.toJson(this, writer);
+        } catch (IOException e) {
+            getLogger(MOD_ID).error("Problem occurred when saving config: " + e.getMessage());
+        }
     }
 
     /**
