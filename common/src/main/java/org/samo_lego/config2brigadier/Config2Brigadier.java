@@ -34,7 +34,7 @@ public class Config2Brigadier {
      * @param file file to load the language file from.
      * @return config object
      */
-    static<T extends IBrigadierConfigurator> T loadConfigFile(File file, Class<T> clazz, Supplier<T> fallbackConstructor) {
+    public static<T extends IBrigadierConfigurator> T loadConfigFile(File file, Class<T> clazz, Supplier<T> fallbackConstructor) {
         T config = null;
         if (file.exists()) {
             try (BufferedReader fileReader = new BufferedReader(
