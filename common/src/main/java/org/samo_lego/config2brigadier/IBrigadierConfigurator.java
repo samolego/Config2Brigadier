@@ -22,9 +22,12 @@ import org.samo_lego.config2brigadier.command.CommandFeedback;
 import org.samo_lego.config2brigadier.util.ConfigFieldList;
 import org.samo_lego.config2brigadier.util.TranslatedText;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
@@ -32,17 +35,14 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static org.apache.logging.log4j.LogManager.getLogger;
 import static org.samo_lego.config2brigadier.Config2Brigadier.GSON;
 import static org.samo_lego.config2brigadier.Config2Brigadier.MOD_ID;
-import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigDouble;
-import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigFloat;
-import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigInt;
-import static org.samo_lego.config2brigadier.command.CommandFeedback.editConfigObject;
+import static org.samo_lego.config2brigadier.command.CommandFeedback.*;
 import static org.samo_lego.config2brigadier.util.ConfigFieldList.populateFields;
 
 /**
@@ -267,6 +267,49 @@ public interface IBrigadierConfigurator {
     }
 
     /**
+     * Loads config file.
+     *
+     * @param file          file to load the language file from.
+     * @param configClass   class of config object.
+     * @param defaultConfig default config supplier.
+     * @return config object
+     */
+    static <C extends IBrigadierConfigurator> C loadConfigFile(File file, Class<C> configClass, Supplier<C> defaultConfig) {
+        C config = null;
+        if (file.exists()) {
+            try (BufferedReader fileReader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
+            )) {
+                config = GSON.fromJson(fileReader, configClass);
+            } catch (IOException e) {
+                throw new RuntimeException(MOD_ID + " Problem occurred when trying to load config: ", e);
+            }
+        }
+        if (config == null)
+            config = defaultConfig.get();
+
+        config.writeToFile(file);
+
+        return config;
+    }
+
+
+
+
+    /**
+     * Saves the config to the given file.
+     *
+     * @param file file to save config to
+     */
+    default void writeToFile(File file) {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
+            GSON.toJson(this, writer);
+        } catch (IOException e) {
+            getLogger(MOD_ID).error("Problem occurred when saving config: " + e.getMessage());
+        }
+    }
+
+    /**
      * Gets the description for attribute field of parent object by checking relevant
      * {@link SerializedName} annotations.
      *
@@ -297,7 +340,7 @@ public interface IBrigadierConfigurator {
         List<Field> descriptionList = Arrays.stream(fields).filter(field -> {
             String name = field.getName();
             return name.contains(attributeName);
-        }).collect(Collectors.toList());
+        }).toList();
 
         // -1 as we don't want to include the option field itself, but just its comments.
         int size = descriptionList.size() - 1;
@@ -333,28 +376,12 @@ public interface IBrigadierConfigurator {
         return textFeedback;
     }
 
-
-
-
-    /**
-     * Saves the config to the given file.
-     *
-     * @param file file to save config to
-     */
-    default void writeToFile(File file) {
-        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
-            GSON.toJson(this, writer);
-        } catch (IOException e) {
-            getLogger(MOD_ID).error("Problem occurred when saving config: " + e.getMessage());
-        }
-    }
-
     /**
      * Generates text information for field and sends it to command executor.
-     * @param context command executor.
-     * @param parent parent object that contains the attribute. Used to get current attribute value.
-     * @param attribute field to generate description for.
      *
+     * @param context   command executor.
+     * @param parent    parent object that contains the attribute. Used to get current attribute value.
+     * @param attribute field to generate description for.
      * @return 1 as success for command execution.
      */
     @ApiStatus.Internal
