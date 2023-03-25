@@ -24,14 +24,14 @@ Depending on the modloader, add `Config2Brigadier` as a dependency. Replace the 
 ```gradle
 dependencies {
     // Architectury (common module)
-    modImplementation 'com.github.samolego:Config2Brigadier:config2brigadier:[LATEST_VERSION]'
+    modImplementation 'com.github.samolego.Config2Brigadier:config2brigadier:[LATEST_VERSION]'
     
     // Fabric
-    modImplementation include('com.github.samolego:Config2Brigadier:config2brigadier-fabric:[LATEST_VERSION]')
+    modImplementation include('com.github.samolego.Config2Brigadier:config2brigadier-fabric:[LATEST_VERSION]')
     
     // Forge
-    implementation fg.deobf 'com.github.samolego:Config2Brigadier:config2brigadier-forge:[LATEST_VERSION]'
-    shadow('com.github.samolego:Config2Brigadier:config2brigadier-forge:[LATEST_VERSION]')
+    implementation fg.deobf 'com.github.samolego.Config2Brigadier:config2brigadier-forge:[LATEST_VERSION]'
+    shadow('com.github.samolego.Config2Brigadier:config2brigadier-forge:[LATEST_VERSION]')
 }
 ```
 
