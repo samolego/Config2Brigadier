@@ -11,7 +11,7 @@
 <link rel="stylesheet" type="text/css" href="../../../script-dir/jquery-ui.min.css" title="Style">
 <link rel="stylesheet" type="text/css" href="../../../jquery-ui.overrides.css" title="Style">
 <script type="text/javascript" src="../../../script.js"></script>
-<script type="text/javascript" src="../../../script-dir/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="../../../script-dir/jquery-3.6.1.min.js"></script>
 <script type="text/javascript" src="../../../script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="class-declaration-page">
@@ -314,13 +314,19 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="getCommentPrefix()">
-<h3>getCommentPrefix</h3>
-<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getCommentPrefix</span>()</div>
-<div class="block">Gets comment prefix of fields.</div>
+<section class="detail" id="loadConfigFile(java.io.File,java.lang.Class,java.util.function.Supplier)">
+<h3>loadConfigFile</h3>
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="type-parameters">&lt;C extends <a href="IBrigadierConfigurator.html" title="interface in org.samo_lego.config2brigadier">IBrigadierConfigurator</a>&gt;</span>&nbsp;<span class="return-type">C</span>&nbsp;<span class="element-name">loadConfigFile</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/File.html" title="class or interface in java.io" class="external-link">File</a>&nbsp;file,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;C&gt;&nbsp;configClass,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;C&gt;&nbsp;defaultConfig)</span></div>
+<div class="block">Loads config file.</div>
 <dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>file</code> - file to load the language file from.</dd>
+<dd><code>configClass</code> - class of config object.</dd>
+<dd><code>defaultConfig</code> - default config supplier.</dd>
 <dt>Returns:</dt>
-<dd>field prefix that is used by comment fields.</dd>
+<dd>config object</dd>
 </dl>
 </section>
 </li>
@@ -350,19 +356,13 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="loadConfigFile(java.io.File,java.lang.Class,java.util.function.Supplier)">
-<h3>loadConfigFile</h3>
-<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="type-parameters">&lt;C extends <a href="IBrigadierConfigurator.html" title="interface in org.samo_lego.config2brigadier">IBrigadierConfigurator</a>&gt;</span>&nbsp;<span class="return-type">C</span>&nbsp;<span class="element-name">loadConfigFile</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/File.html" title="class or interface in java.io" class="external-link">File</a>&nbsp;file,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;C&gt;&nbsp;configClass,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/Supplier.html" title="class or interface in java.util.function" class="external-link">Supplier</a>&lt;C&gt;&nbsp;defaultConfig)</span></div>
-<div class="block">Loads config file.</div>
+<section class="detail" id="getCommentPrefix()">
+<h3>getCommentPrefix</h3>
+<div class="member-signature"><span class="modifiers">default</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">getCommentPrefix</span>()</div>
+<div class="block">Gets comment prefix of fields.</div>
 <dl class="notes">
-<dt>Parameters:</dt>
-<dd><code>file</code> - file to load the language file from.</dd>
-<dd><code>configClass</code> - class of config object.</dd>
-<dd><code>defaultConfig</code> - default config supplier.</dd>
 <dt>Returns:</dt>
-<dd>config object</dd>
+<dd>field prefix that is used by comment fields.</dd>
 </dl>
 </section>
 </li>
