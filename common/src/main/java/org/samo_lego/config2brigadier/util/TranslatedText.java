@@ -25,7 +25,7 @@ public class TranslatedText extends TranslatableContents {
      * @param args arguments to include in text
      */
     public TranslatedText(String key, Object... args) {
-        super(SERVER_TRANSLATIONS_LOADED ? key : (LANG.has(key) ? LANG.get(key).getAsString() : key), args);
+        super(SERVER_TRANSLATIONS_LOADED ? key : (LANG.has(key) ? LANG.get(key).getAsString() : key), key, args);
     }
 
     /**

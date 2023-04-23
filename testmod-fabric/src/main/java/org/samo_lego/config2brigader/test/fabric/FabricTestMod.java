@@ -4,7 +4,6 @@ package org.samo_lego.config2brigader.test.fabric;
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
@@ -40,8 +39,8 @@ public class FabricTestMod implements ModInitializer {
 
 
     private static void registerSimpleCommand(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection selection) {
-        LiteralCommandNode<CommandSourceStack> root = dispatcher.register(literal(MOD_ID));
-        LiteralCommandNode<CommandSourceStack> editConfig = literal("editConfig").build();
+        var root = dispatcher.register(literal(MOD_ID));
+        var editConfig = literal("editConfig").build();
 
         config.generateCommand(editConfig);
 

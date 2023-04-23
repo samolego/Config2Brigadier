@@ -1,10 +1,6 @@
 package org.samo_lego.config2brigadier.command;
 
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -56,9 +52,11 @@ public class CommandFeedback {
 
             context.getSource().sendSuccess(
                     MutableComponent.create(
-                            new TranslatedText("config2brigadier.command.edit.success",
-                                    optionText.withStyle(ChatFormatting.YELLOW),
-                                    newValue)).withStyle(ChatFormatting.GREEN), false);
+                                    new TranslatedText("config2brigadier.command.edit.success",
+                                            optionText.withStyle(ChatFormatting.YELLOW),
+                                            newValue))
+                            .withStyle(ChatFormatting.GREEN),
+                    false);
         } else {
             context.getSource().sendFailure(Component.translatable("command.failed").withStyle(ChatFormatting.RED));
         }

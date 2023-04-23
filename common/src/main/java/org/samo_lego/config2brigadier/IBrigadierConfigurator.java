@@ -1,11 +1,7 @@
 package org.samo_lego.config2brigadier;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.ChatFormatting;
@@ -22,14 +18,7 @@ import org.samo_lego.config2brigadier.command.CommandFeedback;
 import org.samo_lego.config2brigadier.util.ConfigFieldList;
 import org.samo_lego.config2brigadier.util.TranslatedText;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
@@ -166,11 +155,31 @@ public interface IBrigadierConfigurator {
     }
 
     /**
-     * Gets comment prefix of fields.
-     * @return field prefix that is used by comment fields.
+     * Loads config file.
+     *
+     * @param file          file to load the language file from.
+     * @param configClass   class of config object.
+     * @param defaultConfig default config supplier.
+     * @return config object
      */
-    default String getCommentPrefix() {
-        return this.COMMENT_PREFIX;
+    static <C extends IBrigadierConfigurator> C loadConfigFile(File file, Class<C> configClass, Supplier<C> defaultConfig) {
+        C config = null;
+        if (file.exists()) {
+            try (BufferedReader fileReader = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
+            )) {
+                config = GSON.fromJson(fileReader, configClass);
+            } catch (IOException e) {
+                getLogger(MOD_ID).error(MOD_ID + " Problem occurred when trying to load config: ", e);
+            }
+        }
+        if (config == null) {
+            config = defaultConfig.get();
+        }
+
+        config.writeToFile(file);
+
+        return config;
     }
 
     /**
@@ -267,30 +276,11 @@ public interface IBrigadierConfigurator {
     }
 
     /**
-     * Loads config file.
-     *
-     * @param file          file to load the language file from.
-     * @param configClass   class of config object.
-     * @param defaultConfig default config supplier.
-     * @return config object
+     * Gets comment prefix of fields.
+     * @return field prefix that is used by comment fields.
      */
-    static <C extends IBrigadierConfigurator> C loadConfigFile(File file, Class<C> configClass, Supplier<C> defaultConfig) {
-        C config = null;
-        if (file.exists()) {
-            try (BufferedReader fileReader = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)
-            )) {
-                config = GSON.fromJson(fileReader, configClass);
-            } catch (IOException e) {
-                throw new RuntimeException(MOD_ID + " Problem occurred when trying to load config: ", e);
-            }
-        }
-        if (config == null)
-            config = defaultConfig.get();
-
-        config.writeToFile(file);
-
-        return config;
+    default String getCommentPrefix() {
+        return IBrigadierConfigurator.COMMENT_PREFIX;
     }
 
 
