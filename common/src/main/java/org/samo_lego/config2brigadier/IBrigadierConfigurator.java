@@ -429,7 +429,7 @@ public interface IBrigadierConfigurator {
                     MutableComponent.create(new TranslatedText("gui.entity_tooltip.type", type)).withStyle(ChatFormatting.GRAY));
         }
 
-        context.getSource().sendSuccess(fieldDesc.withStyle(ChatFormatting.GOLD), false);
+        context.getSource().sendSuccess(() -> fieldDesc.withStyle(ChatFormatting.GOLD), false);
 
         return 1;
     }

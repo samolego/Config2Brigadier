@@ -50,12 +50,12 @@ public class CommandFeedback {
             config.save();
             MutableComponent newValue = Component.literal(value.toString()).withStyle(ChatFormatting.YELLOW);
 
-            context.getSource().sendSuccess(
-                    MutableComponent.create(
-                                    new TranslatedText("config2brigadier.command.edit.success",
-                                            optionText.withStyle(ChatFormatting.YELLOW),
-                                            newValue))
-                            .withStyle(ChatFormatting.GREEN),
+            context.getSource().sendSuccess(() ->
+                            MutableComponent.create(
+                                            new TranslatedText("config2brigadier.command.edit.success",
+                                                    optionText.withStyle(ChatFormatting.YELLOW),
+                                                    newValue))
+                                    .withStyle(ChatFormatting.GREEN),
                     false);
         } else {
             context.getSource().sendFailure(Component.translatable("command.failed").withStyle(ChatFormatting.RED));
