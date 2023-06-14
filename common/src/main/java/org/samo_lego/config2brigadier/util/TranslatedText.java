@@ -37,7 +37,7 @@ public class TranslatedText extends TranslatableContents {
         InputStream stream = Config2Brigadier.class.getResourceAsStream(langPath);
 
         try {
-            if(stream == null) {
+            if (stream == null) {
                 getLogger(MOD_ID).warn("[Config2Brigadier] Language " + lang + " not available. Switching to en_us.");
                 stream = Config2Brigadier.class.getResourceAsStream("/data/config2brigadier/lang/en_us.json");
             }
@@ -46,10 +46,10 @@ public class TranslatedText extends TranslatableContents {
                 LANG = GSON.fromJson(reader, JsonObject.class);
             }
         } catch (IOException | AssertionError e) {
-            getLogger("Config2Brigadier").error("[Config2Brigadier] Problem occurred when trying to load language: ", e);
+            getLogger(MOD_ID).error("[Config2Brigadier] Problem occurred when trying to load language: ", e);
         }
 
-        if(LANG == null) {
+        if (LANG == null) {
             LANG = new JsonObject();
         }
     }
