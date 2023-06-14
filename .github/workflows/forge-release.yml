@@ -32,10 +32,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build and publish with Gradle
-        run: ./gradlew forge:build forge:curseforge forge:modrinth --stacktrace
-        env:
-          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: ./gradlew forge:build
 
       - name: Upload GitHub release
         uses: AButler/upload-release-assets@v2.0
