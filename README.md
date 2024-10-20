@@ -21,7 +21,7 @@ Add `Config2Brigadier` as a dependency. Replace the `[TAG]` with the one found [
 ```gradle
 dependencies {
     // Config2Brigadier
-    modImplementation include("com.github.samolego.Config2Brigadier:config2brigadier-fabric:[TAG]")
+    modImplementation include("com.github.samolego.Config2Brigadier:config2brigadier:[TAG]")
     
     // You might need this too to translate the command messages
     modImplementation(include("xyz.nucleoid:server-translations-api:${project.server_translations_version}"))
