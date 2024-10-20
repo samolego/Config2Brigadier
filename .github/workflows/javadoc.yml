@@ -18,11 +18,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew common:javadoc
+        run: ./gradlew javadoc
       - name: GitHub Pages Javadoc
         if: success()
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           enable_jekyll: false
-          publish_dir: common/build/docs/javadoc
+          publish_dir: build/docs/javadoc

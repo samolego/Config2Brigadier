@@ -258,7 +258,7 @@ public interface IBrigadierConfigurator {
                     .executes(context -> {
                         this.reload(newConfigLoader.get());
                         this.save();
-                        context.getSource().sendSuccess(() -> Component.translatable("config2brigadier.command.reload.success"), false);
+                        context.getSource().sendSuccess(() -> Component.translatable("commands.reload.success").withStyle(ChatFormatting.GREEN), false);
                         return 1;
                     })
                     .build();
