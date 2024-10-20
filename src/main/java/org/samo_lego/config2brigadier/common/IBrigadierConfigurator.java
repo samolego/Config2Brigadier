@@ -440,7 +440,7 @@ public interface IBrigadierConfigurator {
 
         if (textFeedback.getSiblings().isEmpty()) {
             // This field has no comments describing it
-            MutableComponent feedback = Component.translatable("config2brigadier.command.edit.no_description_found", attributeName)
+            MutableComponent feedback = Component.translatable("config2brigadier.command.edit.missing_description", attributeName)
                     .withStyle(ChatFormatting.LIGHT_PURPLE);
             textFeedback.append(feedback);
         }
