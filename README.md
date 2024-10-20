@@ -71,12 +71,12 @@ public class MyModConfig implements IBrigadierConfigurator {
 
 Register the command
 ```java
-
-// From event handler
-public static class MyMod {
+public static class MyModCommandRegistration {
     private static final String MOD_ID = "my_mod";
-    public static void registerConfigEditCommand(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
-        config.generateReloadableConfigCommand(MOD_ID, dispatcher, MyMod::readConfig);
+
+    // From event handler
+    public static void registerConfigEditCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
+        config.generateReloadableConfigCommand(MOD_ID, dispatcher, MyModCommandRegistration::readConfig);
     }
 
     private static SimpleConfig readConfig() {
