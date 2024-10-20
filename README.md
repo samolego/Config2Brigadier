@@ -30,9 +30,9 @@ dependencies {
 
 ## Usage
 
-*See [testmod](https://github.com/samolego/Config2Brigadier/tree/master/testmod-fabric/src/main/java/org/samo_lego/config2brigader/test/fabric)*
+*See [testmod](https://github.com/samolego/Config2Brigadier/blob/master/src/test/java/org/samo_lego/config2brigader/test/fabric/)*
 
-You need a special class that wil hold your config data. Make it implement the [`IBrigadierConfigurator`](https://github.com/samolego/Config2Brigadier/blob/master/common/src/main/java/org/samo_lego/config2brigadier/IBrigadierConfigurator.java)
+You need a special class that wil hold your config data. Make it implement the [`IBrigadierConfigurator`](https://github.com/samolego/Config2Brigadier/blob/master/src/main/java/org/samo_lego/config2brigadier/common/IBrigadierConfigurator.java)
 interface.
 
 Sample config class
@@ -99,12 +99,27 @@ This will generate the following command:
             randomQuestions <string list>
 ```
 
+## Permissions
+Config2Brigadier fully supports fabric permission API. All commands require permission made of command parts, e.g.:
+```
+/my_mod config reload
+```
+will require permission `my_mod.config.reload`.
+
+Similarly,
+```
+/my_mod config edit show true
+```
+will require permission `my_mod.config.edit.show`.
+
+*Note*: permissions are granted by default for all OP players.
+
 ## Adding descriptions to options
 
 If you have followed [this guide](https://quiltservertools.github.io/ServerSideDevDocs/config/gson_config/) on configs,
 descriptions for values will be automatically generated from `_comment_` fields.
 
-But there's an alternative to that. Use [`BrigadierDescription`](https://github.com/samolego/Config2Brigadier/blob/master/common/src/main/java/org/samo_lego/config2brigadier/annotation/BrigadierDescription.java)
+But there's an alternative to that. Use [`BrigadierDescription`](https://github.com/samolego/Config2Brigadier/blob/master/src/main/java/org/samo_lego/config2brigadier/common/annotation/BrigadierDescription.java)
 annotation to add description and / or default field value.
 ```java
 // Upgraded above example
@@ -131,9 +146,9 @@ Do you have any fields you want to exclude from command?
 * static fields
 * fields starting with `_comment_`
 
-*(to change this behaviour, override [`IBrigadierConfigurator#shouldExclude(Field)`](https://github.com/samolego/Config2Brigadier/blob/421774399ed9dc1d2b50c430cc0315a6a528c48f/common/src/main/java/org/samo_lego/config2brigadier/IBrigadierConfigurator.java#L119))*
+*(to change this behaviour, override [`IBrigadierConfigurator#shouldExclude(Field)`](https://github.com/samolego/Config2Brigadier/blob/038332c900fd4bf4b350261f385a5a97300900f9/src/main/java/org/samo_lego/config2brigadier/common/IBrigadierConfigurator.java#L161))*
 
-Use [`BrigadierExcluded`](https://github.com/samolego/Config2Brigadier/blob/master/common/src/main/java/org/samo_lego/config2brigadier/annotation/BrigadierExcluded.java)
+Use [`BrigadierExcluded`](https://github.com/samolego/Config2Brigadier/blob/master/src/main/java/org/samo_lego/config2brigadier/common/annotation/BrigadierExcluded.java)
 annotation.
 ```java
 // Upgraded above example
