@@ -1,115 +1,141 @@
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.1-SNAPSHOT" apply false
-    id "org.spongepowered.gradle.vanilla" version "0.2.1-SNAPSHOT" apply false
-    id "org.spongepowered.gradle.plugin" version "2.0.2" apply false
+    id "fabric-loom" version "1.8.9"
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
 }
 
 repositories {
     mavenCentral()
     maven {
-        url 'https://jitpack.io'
+        name = "Fabric"
+        url = "https://maven.fabricmc.net/"
     }
-    maven { url "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven" }
-    maven {
-        name = "ParchmentMC"
-        url = "https://maven.parchmentmc.net/"
-    }
-    maven {
-        url = "https://repo.spongepowered.org/repository/maven-public/"
-    }
+    maven { url 'https://maven.nucleoid.xyz' }
 }
 
-architectury {
-    minecraft = rootProject.minecraft_version
-}
+loom {
+    splitEnvironmentSourceSets()
+    
+    runs {
+        client {
+            // Add a VM arg
+            vmArgs "-Dexample=true"
+            // Add a JVM property
+            property("example", "true")
+            // Add a program arg
+            programArg "--example"
+            // Add an environment variable
+            environmentVariable("example", "true")
+            // The environment (or side) to run, usually client or server.
+            environment = "client"
+            // The full name of the run configuration, i.e. 'Minecraft Client'. By default this is determined from the base name.
+            configName = "Minecraft Client"
+            // The default main class of the run configuration. This will be overridden if using a mod loader with a fabric_installer.json file.
+            defaultMainClass = ""
+            // The run directory for this configuration, relative to the root project directory.
+            runDir = "run"
+            // The sourceset to run, commonly set to sourceSets.test
+            source = sourceSets.main
+            // When true a run configuration file will be generated for IDE's. By default only set to true for the root project.
+            ideConfigGenerated = true
 
-allprojects {
-    tasks.create("prepareWorkspace") {}
-}
+            // Configure run config with the default client options.
+            client()
 
-subprojects {
-    if (it.name != "sponge") {
-        apply plugin: "dev.architectury.loom"
-
-        loom {
-            silentMojangMappingsLicense()
+            // Configure run config with the default server options.
+            server()
         }
 
-        dependencies {
-            minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-            // The following line declares the mojmap mappings, you may use other mappings as well
-            mappings loom.officialMojangMappings()
-            // The following line declares the yarn mappings you may select this one as well.
-            // mappings "net.fabricmc:yarn:1.17.1+build.32:v2"
+        // Example of creating a basic run config for tests
+        testClient {
+            // Copies settings from another run configuration.
+            inherit client
+
+            configName = "Test Minecraft Client"
+            source = sourceSets.test
         }
-    } else {
-        apply plugin: "org.spongepowered.gradle.vanilla"
-        apply plugin: "org.spongepowered.gradle.plugin"
+    }
+
+    mods {
+        modid {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+
+}
+
+dependencies {
+    // To change the versions see the gradle.properties file
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    
+    // Official mappings
+    mappings loom.layered {
+        it.officialMojangMappings {
+            setNameSyntheticMembers(false)
+        }
+    }
+    
+    // Server translated language
+    //testRuntimeOnly("xyz.nucleoid:server-translations-api:${project.server_translations_version}")
+
+    // Permissions API
+    modImplementation(include("me.lucko:fabric-permissions-api:${project.permissions_api_version}"))
+
+    
+    // Testmod
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
     }
 }
 
-allprojects {
-    apply plugin: "java"
-    if (it.name != 'sponge') {
-        apply plugin: "architectury-plugin"
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+java {
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}"}
     }
-    apply plugin: "maven-publish"
+}
 
-    archivesBaseName = rootProject.archives_base_name + "-" + project.name
-    version = rootProject.mod_version
-    group = rootProject.maven_group
+// configure the maven publication
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = project.archives_base_name
+            from components.java
+        }
+    }
 
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
-        mavenCentral()
-        maven {
-            url 'https://jitpack.io'
-        }
-        maven {
-            name = "Nucleoid maven"
-            url = "https://maven.nucleoid.xyz/"
-        }
-        maven { url "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven" }
-        maven {
-            name = "ParchmentMC"
-            url = "https://maven.parchmentmc.net/"
-        }
-        maven {
-            url = "https://repo.spongepowered.org/repository/maven-public/"
-        }
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-
-        def javaTarget = 17
-        options.release = javaTarget
-
-        sourceCompatibility = JavaVersion.toVersion(javaTarget)
-        targetCompatibility = JavaVersion.toVersion(javaTarget)
-        if (JavaVersion.current() < JavaVersion.toVersion(javaTarget)) {
-            toolchain.languageVersion.set(JavaLanguageVersion.of(javaTarget))
-        }
-    }
-
-    java {
-        withSourcesJar()
-    }
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifactId = rootProject.archives_base_name + "-" + project.name
-                from components.java
-            }
-        }
-
-        // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-        repositories {
-            // Add repositories to publish to here.
-            // Notice: This block does NOT have the same function as the block in the top level.
-            // The repositories here will be used for publishing your artifact, not for
-            // retrieving dependencies.
-        }
+        // Add repositories to publish to here.
+        // Notice: This block does NOT have the same function as the block in the top level.
+        // The repositories here will be used for publishing your artifact, not for
+        // retrieving dependencies.
     }
 }

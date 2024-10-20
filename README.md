@@ -6,32 +6,25 @@ https://user-images.githubusercontent.com/34912839/136461980-de7735d0-93c1-4fee-
 
 (generated from [below example](#usage))
 
-## Warning
-
-A yarn contributor? Project source uses mojmap (notably mappings for command nodes and texts).
-
 ## Including in your project
 
 ## Dependency
-Add `jitpack.io` maven repository.
+Add `jitpack.io` and nucleoid maven repository.
 ```gradle
 repositories {
     maven { url 'https://jitpack.io' }
+    maven { url 'https://maven.nucleoid.xyz' }  // For server translations API
 }
 ```
 
-Depending on the modloader, add `Config2Brigadier` as a dependency. Replace the `[LATEST_VERSION]` with the one found [here](https://github.com/samolego/Config2Brigadier/releases/latest).
+Add `Config2Brigadier` as a dependency. Replace the `[TAG]` with the one found [here](https://github.com/samolego/Config2Brigadier/releases/latest).
 ```gradle
 dependencies {
-    // Architectury (common module)
-    modImplementation 'com.github.samolego.Config2Brigadier:config2brigadier:[LATEST_VERSION]'
+    // Config2Brigadier
+    modImplementation include("com.github.samolego.Config2Brigadier:config2brigadier-fabric:[TAG]")
     
-    // Fabric
-    modImplementation include('com.github.samolego.Config2Brigadier:config2brigadier-fabric:[LATEST_VERSION]')
-    
-    // Forge
-    implementation fg.deobf 'com.github.samolego.Config2Brigadier:config2brigadier-forge:[LATEST_VERSION]'
-    shadow('com.github.samolego.Config2Brigadier:config2brigadier-forge:[LATEST_VERSION]')
+    // You might need this too to translate the command messages
+    modImplementation(include("xyz.nucleoid:server-translations-api:${project.server_translations_version}"))
 }
 ```
 
@@ -81,27 +74,29 @@ Register the command
 
 // From event handler
 public static class MyMod {
+    private static final String MOD_ID = "my_mod";
     public static void registerConfigEditCommand(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
-        LiteralCommandNode<ServerCommandSource> root = dispatcher.register(literal("mymod"));
-        LiteralCommandNode<ServerCommandSource> editConfig = literal("editConfig").build();
+        config.generateReloadableConfigCommand(MOD_ID, dispatcher, MyMod::readConfig);
+    }
 
-        // Config being any object implementing API interface
-        // DO NOT reassign the config field. Make it final to be sure.
-        // If you reassign it, the command will still edit the old object,
-        // but you'll ne using a new one.
-        final MyModConfig config = new MyModConfig();
-        config.generateCommand(editConfig);
-
-        // A built-in `reload(newConfig)` method is available to be called
-        // if you need to load the config values from `newConfig`.
-        MyModConfig newConfig = new MyModConfig(); // or load config from disk
-        config.reload(newConfig);
-        // config now has newConfig values
-
-        // Finally, add edit config node to `/mymod` command
-        root.addChild(editConfig);
+    private static SimpleConfig readConfig() {
+        return IBrigadierConfigurator.loadConfigFile(new File("config/config2brigadier_test.json"), MyModConfig.class, MyModConfig::new);
     }
 }
+```
+
+This will generate the following command:
+```
+/my_mod
+    config
+        reload // <- Reloads the config
+        edit
+            activationRange <float>
+            show <boolean>
+            message <string>
+            nested
+                message <string>
+            randomQuestions <string list>
 ```
 
 ## Adding descriptions to options
