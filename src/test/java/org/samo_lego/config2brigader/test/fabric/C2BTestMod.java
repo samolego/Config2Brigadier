@@ -10,7 +10,6 @@ import net.minecraft.commands.Commands;
 import org.samo_lego.config2brigadier.common.IBrigadierConfigurator;
 
 import java.io.File;
-import java.io.IOException;
 
 public class C2BTestMod implements ModInitializer {
     public static final String MOD_ID = "config2brigadier_test";
