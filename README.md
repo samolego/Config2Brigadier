@@ -72,6 +72,7 @@ public class MyModConfig implements IBrigadierConfigurator {
 Register the command
 ```java
 public static class MyModCommandRegistration {
+    public static final MyModConfig config = new MyModConfig();  // Or import it from elsewhere in your mod
     private static final String MOD_ID = "my_mod";
 
     // From event handler
