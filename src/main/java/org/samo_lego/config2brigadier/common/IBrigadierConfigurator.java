@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import static java.util.logging.Logger.getLogger;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static org.apache.logging.log4j.LogManager.getLogger;
 import static org.samo_lego.config2brigadier.common.Config2Brigadier.GSON;
 import static org.samo_lego.config2brigadier.common.Config2Brigadier.MOD_ID;
 import static org.samo_lego.config2brigadier.common.util.ConfigFieldList.populateFields;
@@ -178,7 +178,7 @@ public interface IBrigadierConfigurator {
             )) {
                 config = GSON.fromJson(fileReader, configClass);
             } catch (IOException e) {
-                getLogger(MOD_ID).error("[Config2Brigadier] Problem occurred when trying to load config: ", e);
+                getLogger(MOD_ID).severe("[Config2Brigadier] Problem occurred when trying to load config: " +  e.getMessage());
             }
         }
         if (config == null) {
@@ -378,7 +378,7 @@ public interface IBrigadierConfigurator {
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             GSON.toJson(this, writer);
         } catch (IOException e) {
-            getLogger(MOD_ID).error("[Config2Brigadier] Problem occurred when saving config: {}", e.getMessage());
+            getLogger(MOD_ID).severe("[Config2Brigadier] Problem occurred when saving config: " +  e.getMessage());
         }
     }
 
@@ -471,8 +471,8 @@ public interface IBrigadierConfigurator {
                 final String finalDefaultOption = defaultOption;
                 MutableComponent defaultValueComponent = Component.literal(defaultOption).withStyle(ChatFormatting.DARK_GREEN)
                         .withStyle(style -> style
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(finalDefaultOption)))
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, finalDefaultOption))
+                                .withHoverEvent(new HoverEvent.ShowText(Component.literal(finalDefaultOption)))
+                                .withClickEvent(new ClickEvent.SuggestCommand(finalDefaultOption))
                         );
                 fieldDesc.append("\n").append(Component.translatable("editGamerule.default", defaultValueComponent)).withStyle(ChatFormatting.GRAY);
             }
@@ -485,8 +485,8 @@ public interface IBrigadierConfigurator {
                 MutableComponent valueComponent = Component.literal(value).withStyle(ChatFormatting.GREEN)
                         .withStyle(ChatFormatting.BOLD)
                         .withStyle(style -> style
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(value)))
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, value))
+                                .withHoverEvent(new HoverEvent.ShowText(Component.literal(value)))
+                                .withClickEvent(new ClickEvent.SuggestCommand(value))
                         );
 
                 if (!defaultOption.isEmpty() && !defaultOption.equals(value)) {
@@ -501,7 +501,7 @@ public interface IBrigadierConfigurator {
                 );
             }
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            getLogger(MOD_ID).severe("[Config2Brigadier] Problem occurred when trying to get field value: " + e.getMessage());
         }
 
 

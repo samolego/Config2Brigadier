@@ -2,6 +2,7 @@ package org.samo_lego.config2brigadier.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.Strictness;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,12 +12,13 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
-import static org.apache.logging.log4j.LogManager.getLogger;
+import static java.util.logging.Logger.getLogger;
+
 
 public class Config2Brigadier {
     public static final String MOD_ID = "config2brigadier";
     public static final Gson GSON = new GsonBuilder()
-            .setLenient()
+            .setStrictness(Strictness.LENIENT)
             .setPrettyPrinting()
             .disableHtmlEscaping()
             .create();
@@ -34,7 +36,7 @@ public class Config2Brigadier {
                     new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
                 config = GSON.fromJson(fileReader, clazz);
             } catch (IOException e) {
-                getLogger(MOD_ID).error("[Config2Brigadier] Problem occurred when trying to load config: ", e);
+                getLogger(MOD_ID).severe("[Config2Brigadier] Problem occurred when trying to load config: " + e.getMessage());
             }
         }
         if (config == null) {
