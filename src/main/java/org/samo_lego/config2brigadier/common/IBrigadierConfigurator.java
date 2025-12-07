@@ -12,6 +12,8 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.permissions.Permission.HasCommandLevel;
+import net.minecraft.server.permissions.PermissionLevel;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +43,6 @@ import static org.samo_lego.config2brigadier.common.util.ConfigFieldList.populat
  * An interface your config should implement.
  */
 public interface IBrigadierConfigurator {
-
     /**
      * Default comment field prefix.
      */
@@ -167,10 +168,10 @@ public interface IBrigadierConfigurator {
      *
      * @param file          file to load the language file from.
      * @param configClass   class of config object.
-     * @param defaultConfig default config supplier.
+     * @param fallbackConstructor default config supplier.
      * @return config object
      */
-    static <C extends IBrigadierConfigurator> C loadConfigFile(File file, Class<C> configClass, Supplier<C> defaultConfig) {
+    static <C extends IBrigadierConfigurator> C loadConfigFile(File file, Class<C> configClass, Supplier<C> fallbackConstructor) {
         C config = null;
         if (file.exists()) {
             try (BufferedReader fileReader = new BufferedReader(
@@ -182,7 +183,7 @@ public interface IBrigadierConfigurator {
             }
         }
         if (config == null) {
-            config = defaultConfig.get();
+            config = fallbackConstructor.get();
         }
 
         config.writeToFile(file);
@@ -253,8 +254,9 @@ public interface IBrigadierConfigurator {
 
         if (newConfigLoader != null) {
             permissionNodes.add(RELOAD_STR);
+            var gameMastersPermission = new HasCommandLevel(PermissionLevel.GAMEMASTERS);
             var reloadNode = literal(RELOAD_STR)
-                    .requires(src -> Permissions.check(src, String.join(".", permissionNodes), src.hasPermission(4)))
+                    .requires(src -> Permissions.check(src, String.join(".", permissionNodes), src.permissions().hasPermission(gameMastersPermission)))
                     .executes(context -> {
                         this.reload(newConfigLoader.get());
                         this.save();
@@ -296,6 +298,7 @@ public interface IBrigadierConfigurator {
                 
         };
 
+        var ownersPermission = new HasCommandLevel(PermissionLevel.OWNERS);
         // Build the edit nodes for sub-*values*.
         for (CommandData data : commandData) {
             for (Field field : data.fields) {
@@ -313,7 +316,7 @@ public interface IBrigadierConfigurator {
                 }
 
                 LiteralCommandNode<CommandSourceStack> node = literal(commandNodeName)
-                        .requires(src -> permission.isEmpty() && src.hasPermission(4) || Permissions.check(src, permission, src.hasPermission(4)))
+                        .requires(src -> permission.isEmpty() && src.permissions().hasPermission(ownersPermission) || Permissions.check(src, permission, src.permissions().hasPermission(ownersPermission)))
                         .then(argument("value", argType)
                                 .executes(context -> data.editorFunction.apply(context, field))
                         )

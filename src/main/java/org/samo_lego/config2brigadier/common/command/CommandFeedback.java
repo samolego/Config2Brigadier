@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 
 import static org.samo_lego.config2brigadier.common.Config2Brigadier.GSON;
 
+
 /**
  * Takes care of field editing and feedbacks for executed commands.
  */
