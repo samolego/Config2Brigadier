@@ -116,6 +116,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+
+tasks.test {
+    failOnNoDiscoveredTests = false
+}
+
+
 jar {
     from("LICENSE") {
         rename { "${it}_${project.base.archivesName.get()}"}
