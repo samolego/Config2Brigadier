@@ -106,6 +106,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_25
 }
 
+
+tasks.test {
+    failOnNoDiscoveredTests = false
+}
+
+
 jar {
     inputs.property "archivesName", project.base.archivesName
 
