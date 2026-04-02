@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version "${loom_version}"
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
     id 'maven-publish'
 }
 
@@ -74,36 +74,26 @@ loom {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    
-    // Official mappings
-    mappings loom.layered {
-        it.officialMojangMappings {
-            setNameSyntheticMembers(false)
-        }
-    }
-    
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
+
     // Server translated language
     //testRuntimeOnly("xyz.nucleoid:server-translations-api:${project.server_translations_version}")
 
     // Permissions API
-    modImplementation(include("me.lucko:fabric-permissions-api:${project.permissions_api_version}"))
-
-    
-    // Testmod
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
+    implementation(include("me.lucko:fabric-permissions-api:${project.permissions_api_version}"))
 }
 
 processResources {
     inputs.property "version", project.version
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand "version": inputs.properties.version
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 21
+    it.options.release = 25
 }
 
 java {
@@ -112,13 +102,15 @@ java {
     // If you remove this line, sources will not be generated.
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {
+    inputs.property "archivesName", project.base.archivesName
+
     from("LICENSE") {
-        rename { "${it}_${project.base.archivesName.get()}"}
+        rename { "${it}_${inputs.properties.archivesName}"}
     }
 }
 
