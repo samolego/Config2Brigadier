@@ -74,7 +74,10 @@ public interface IBrigadierConfigurator {
     String EDIT_STR = "edit";
     String RELOAD_STR = "reload";
 
-    Gson MSG_GSON = new GsonBuilder().setStrictness(Strictness.LENIENT).create();
+    Gson MSG_GSON = new GsonBuilder()
+        .setStrictness(Strictness.LENIENT)
+
+        .create();
 
     /**
      * Method called after a value is edited. The config should be saved to prevent
@@ -1177,7 +1180,7 @@ public interface IBrigadierConfigurator {
                     fieldDesc
                         .append("\n")
                         .append(
-                            Component.literal("map:").withStyle(
+                            Component.translatable("config2brigadier.command.edit.values").withStyle(
                                 ChatFormatting.GRAY
                             )
                         );
@@ -1199,7 +1202,7 @@ public interface IBrigadierConfigurator {
                             : MSG_GSON.toJson(v);
 
                         MutableComponent line = Component.literal(
-                            "\n" + keyStr + ": " + valStr + " "
+                            "\n" + keyStr + " -> " + valStr + " "
                         ).withStyle(ChatFormatting.WHITE);
 
                         if (complex) {
@@ -1290,7 +1293,7 @@ public interface IBrigadierConfigurator {
                     fieldDesc
                         .append("\n")
                         .append(
-                            Component.literal("list:").withStyle(
+                            Component.translatable("config2brigadier.command.edit.values").withStyle(
                                 ChatFormatting.GRAY
                             )
                         );
@@ -1306,7 +1309,7 @@ public interface IBrigadierConfigurator {
                         Object v = list.get(i);
                         String valStr = isSimple(v.getClass())
                             ? String.valueOf(v)
-                            : GSON.toJson(v);
+                            : MSG_GSON.toJson(v);
                         final int finalI = i;
 
                         MutableComponent line = Component.literal(
@@ -1395,14 +1398,14 @@ public interface IBrigadierConfigurator {
                     fieldDesc
                         .append("\n")
                         .append(
-                            Component.literal("set:").withStyle(
+                            Component.translatable("config2brigadier.command.edit.values").withStyle(
                                 ChatFormatting.GRAY
                             )
                         );
                     for (Object v : set) {
                         String valStr = isSimple(v.getClass())
                             ? String.valueOf(v)
-                            : GSON.toJson(v);
+                            : MSG_GSON.toJson(v);
 
                         MutableComponent line = Component.literal(
                             "\n - " + valStr + " "
@@ -1437,7 +1440,7 @@ public interface IBrigadierConfigurator {
                         val != null
                             ? (isSimple(val.getClass())
                                   ? val.toString()
-                                  : GSON.toJson(val))
+                                  : MSG_GSON.toJson(val))
                             : "null";
                     MutableComponent valueComponent = Component.literal(value)
                         .withStyle(ChatFormatting.GREEN)

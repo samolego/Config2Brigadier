@@ -39,7 +39,7 @@ dependencies {
     implementation("net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
 
     // Server translated language
-    //testRuntimeOnly("xyz.nucleoid:server-translations-api:${project.server_translations_version}")
+    implementation(include("xyz.nucleoid:server-translations-api:${project.server_translations_version}"))
 
     // Permissions API
     implementation(include("me.lucko:fabric-permissions-api:${project.permissions_api_version}"))

@@ -2,5 +2,6 @@
   "config2brigadier.command.edit.success": "Nastavitev %s je bila uspešno nastavljena na %s.",
   "config2brigadier.command.edit.add.success": "Vrednost %s je bila uspešno dodana v %s.",
   "config2brigadier.command.edit.remove.success": "Vrednost %s je bila uspešno odstranjena iz %s.",
-  "config2brigadier.command.edit.missing_description": "Za nastavitev %s ni na voljo nobenega opisa."
+  "config2brigadier.command.edit.missing_description": "Za nastavitev %s ni na voljo nobenega opisa.",
+  "config2brigadier.command.edit.values": "Vrednosti"
 }
