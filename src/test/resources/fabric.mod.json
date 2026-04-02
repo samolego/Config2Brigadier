@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "config2brigadier-test",
-  "version": "${version}",
+  "version": "0.0.0",
   "name": "Config to Brigadier Testmod",
   "description": "A library to automagically generate in-game command for config editing.",
   "authors": [

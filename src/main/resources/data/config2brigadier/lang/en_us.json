@@ -1,4 +1,6 @@
 {
   "config2brigadier.command.edit.success": "Config option %s was successfully set to %s.",
+  "config2brigadier.command.edit.add.success": "Value %s was successfully added to %s.",
+  "config2brigadier.command.edit.remove.success": "Value %s was successfully removed from %s.",
   "config2brigadier.command.edit.missing_description": "No description was found for option %s."
 }

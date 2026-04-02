@@ -19,51 +19,12 @@ repositories {
     maven { url 'https://maven.nucleoid.xyz' }
 }
 
+
 loom {
     splitEnvironmentSourceSets()
-    
-    runs {
-        client {
-            // Add a VM arg
-            vmArgs "-Dexample=true"
-            // Add a JVM property
-            property("example", "true")
-            // Add a program arg
-            programArg "--example"
-            // Add an environment variable
-            environmentVariable("example", "true")
-            // The environment (or side) to run, usually client or server.
-            environment = "client"
-            // The full name of the run configuration, i.e. 'Minecraft Client'. By default this is determined from the base name.
-            configName = "Minecraft Client"
-            // The default main class of the run configuration. This will be overridden if using a mod loader with a fabric_installer.json file.
-            defaultMainClass = ""
-            // The run directory for this configuration, relative to the root project directory.
-            runDir = "run"
-            // The sourceset to run, commonly set to sourceSets.test
-            source = sourceSets.main
-            // When true a run configuration file will be generated for IDE's. By default only set to true for the root project.
-            ideConfigGenerated = true
-
-            // Configure run config with the default client options.
-            client()
-
-            // Configure run config with the default server options.
-            server()
-        }
-
-        // Example of creating a basic run config for tests
-        testClient {
-            // Copies settings from another run configuration.
-            inherit client
-
-            configName = "Test Minecraft Client"
-            source = sourceSets.test
-        }
-    }
 
     mods {
-        modid {
+        "modid" {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }
